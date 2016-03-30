@@ -61,6 +61,7 @@ struct Light
 };
 
 #include "constantBuffer0.h"
+
 struct MODEL_CONSTANT_BUFFER;
 struct REFLECT_CONSTANT_BUFFER;
 struct TEST_CONSTANT_BUFFER;
@@ -70,28 +71,17 @@ enum LightType
 	DIRECTIONAL_LIGHT, POINT_LIGHT, SPOT_LIGHT
 };
 
+//TODO convert light manager from being a a singleton
+
 class LightManager
 {
 private:
-	MODEL_CONSTANT_BUFFER* m_cb0;
 	std::vector<Light*> m_lights;
 	XMVECTOR m_ambientLight;
-	int m_lightCount;
-	
-	LightManager();
 public:
-	static LightManager& getInstance()
-	{
-		static LightManager instance;
-		return instance;
-	}
-
-	LightManager(LightManager const&) = delete;
-	void operator=(LightManager const&) = delete;
+	LightManager();
 	~LightManager();
-	void addLight(Light& light);
-	void addLight(XMVECTOR position, XMVECTOR direction, XMVECTOR colour, float angle, float constAttenuation, float linAttenuation, float quadAttenuation, LightType type);
-	void registerCBuffer(MODEL_CONSTANT_BUFFER* cb0);
+	void addLight(const Light& light);
 	void renderLights(const XMMATRIX& modelMatrix, MODEL_CONSTANT_BUFFER* cb0);
 	void renderLights(const XMMATRIX& modelMatrix, REFLECT_CONSTANT_BUFFER* cb0);
 	void renderLights(const XMMATRIX& modelMatrix, TEST_CONSTANT_BUFFER* cb0);

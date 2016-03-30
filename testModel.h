@@ -13,6 +13,14 @@ struct ID3D11PixelShader;
 struct ID3D11InputLayout;
 struct ID3D11Buffer;
 
+struct RenderInfo
+{
+	XMMATRIX* world;
+	XMMATRIX* view;
+	XMMATRIX* projection;
+	ID3D11ShaderResourceView* skyboxTexture;
+};
+
 class TestModel
 {
 private:
@@ -27,6 +35,7 @@ private:
 	ID3D11ShaderResourceView* m_pTexture;
 	ID3D11SamplerState* m_pSampler;
 	Material*	m_pMaterial;
+	LightManager* m_pLightManager;
 	
 
 	float m_x, m_y, m_z,
@@ -38,14 +47,16 @@ private:
 		m_boundingSphereRadius;
 	bool m_unlit;
 
+	unsigned int m_shaderID;
+
 	void CalculateModelCenterPoint();
 	void CalculateBoundingSphereRadius();
 public:
-	TestModel(ID3D11Device* device, ID3D11DeviceContext* context);
+	TestModel(ID3D11Device* device, ID3D11DeviceContext* context, LightManager* lightManager);
 	~TestModel();
 	int LoadObjModel(char* fileName);
 	//Don't worry, this class is going to be re-made
-	void Draw(XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, ID3D11ShaderResourceView* skyboxTexture);
+	void Draw(RenderInfo* data);
 	int AddTexture(char* fileName);
 	void setMaterial(Material* material){ m_pMaterial = material; }
 	void setXPos(float XPos){ m_x = XPos; }
@@ -77,6 +88,7 @@ public:
 	bool checkCollision(TestModel* model);
 	ObjFileModel* getObject(){ return m_pObject; }
 	void toggleUnlit(bool t){ m_unlit = t; }
+	unsigned int getShaderID(){ return m_shaderID; }
 };
 
 #endif	_MODEL_H_

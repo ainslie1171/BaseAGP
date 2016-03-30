@@ -4,35 +4,23 @@ using namespace std;
 
 LightManager::LightManager()
 {
-	m_lightCount = 0;
+
 }
 
 LightManager::~LightManager()
 {
+	//TODO: fix light manager destructor
 	m_lights.clear();
 }
 
-void LightManager::addLight(Light& light)
+void LightManager::addLight(const Light& light)
 {
 	if (m_lights.size() < MAX_LIGHTS)
 	{
-		m_lights.push_back(&light);
-		m_lightCount++;
+		Light* newLight = new Light;
+		*newLight = light;
+		m_lights.push_back(newLight);
 	}
-}
-
-void LightManager::addLight(XMVECTOR position, XMVECTOR direction, XMVECTOR colour, float angle, float constAttenuation, float linAttenuation, float quadAttenuation, LightType type)
-{
-	if (m_lights.size() < MAX_LIGHTS)
-	{
-		m_lights.push_back(new Light(position, direction, colour, angle, constAttenuation, linAttenuation, quadAttenuation, type));
-		m_lightCount++;
-	}
-}
-
-void LightManager::registerCBuffer(MODEL_CONSTANT_BUFFER* cb0)
-{
-	m_cb0 = cb0;
 }
 
 void LightManager::renderLights(const XMMATRIX& modelMatrix, MODEL_CONSTANT_BUFFER* cb0)
@@ -42,7 +30,7 @@ void LightManager::renderLights(const XMMATRIX& modelMatrix, MODEL_CONSTANT_BUFF
 	XMMATRIX inverse = XMMatrixInverse(&determinant, modelMatrix);
 	
 	cb0->ambient_light_colour = m_ambientLight;
-	cb0->lightCount = m_lightCount;
+	cb0->lightCount = m_lights.size();
 	cb0->InvTransWorldMatrix = inverse;
 
 	for (unsigned int i = 0; i < m_lights.size(); i++)
@@ -85,7 +73,7 @@ void LightManager::renderLights(const XMMATRIX& modelMatrix, REFLECT_CONSTANT_BU
 	XMMATRIX inverse = XMMatrixInverse(&determinant, modelMatrix);
 
 	cb0->ambient_light_colour = m_ambientLight;
-	cb0->lightCount = m_lightCount;
+	cb0->lightCount = m_lights.size();
 	cb0->InvTransWorldMatrix = inverse;
 
 	for (unsigned int i = 0; i < m_lights.size(); i++)
@@ -128,7 +116,7 @@ void LightManager::renderLights(const XMMATRIX& modelMatrix, TEST_CONSTANT_BUFFE
 	XMMATRIX inverse = XMMatrixInverse(&determinant, modelMatrix);
 
 	cb0->ambient_light_colour = m_ambientLight;
-	cb0->lightCount = m_lightCount;
+	cb0->lightCount = m_lights.size();
 	cb0->InvTransWorldMatrix = inverse;
 
 	for (unsigned int i = 0; i < m_lights.size(); i++)
@@ -171,9 +159,6 @@ void LightManager::setAmbientLight(XMVECTOR colour)
 
 void LightManager::removeLight(int index)
 {
-	if (m_lights.at(index))
-	{
-		m_lights.erase(m_lights.begin() + index);
-		m_lightCount--;
-	}
+	//TODO make sure this is correct
+	m_lights.erase(m_lights.begin() + index);
 }

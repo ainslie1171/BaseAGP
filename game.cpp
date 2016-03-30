@@ -189,7 +189,7 @@ HRESULT Game::InitialiseD3D()
 	// Set the render target view
 	m_pImmediateContext->OMSetRenderTargets(1, &m_pBackBufferRTView, m_pZBuffer);
 
-	// Set the viewport
+	// Set the viewporta
 	D3D11_VIEWPORT viewport;
 
 	viewport.TopLeftX = 0;
@@ -260,6 +260,9 @@ HRESULT Game::InitialiseGraphics()
 {
 	//HRESULT hr = S_OK;
 
+	Shader* s = new Shader(m_pD3DDevice, "testShader.hlsl");
+	m_shaders.push_back(s);
+	m_lightManger = new LightManager();
 	//Materials
 	m_materialManager = new materialManager();
 	Material* white = m_materialManager->getMaterial(WhitePlastic);
@@ -268,13 +271,14 @@ HRESULT Game::InitialiseGraphics()
 
 
 	SKYBOX_DESC sbDesc;
+	ZeroMemory(&sbDesc, sizeof(sbDesc));
 	sbDesc.device = m_pD3DDevice;
 	sbDesc.context = m_pImmediateContext;
 	sbDesc.textureFilepath = "assets/skybox02.dds";
 	m_skybox = new Skybox(sbDesc);
 
 
-	cube = new TestModel(m_pD3DDevice, m_pImmediateContext);
+	cube = new TestModel(m_pD3DDevice, m_pImmediateContext, m_lightManger);
 	cube->LoadObjModel("assets/cube.obj");
 	cube->AddTexture("assets/yellow.bmp");
 	cube->setMaterial(m_materialManager->getMaterial(WhitePlastic));
@@ -288,7 +292,7 @@ HRESULT Game::InitialiseGraphics()
 	//sphere->toggleUnlit(true);
 	m_models.push_back(sphere);
 
-	pointySphere = new TestModel(m_pD3DDevice, m_pImmediateContext);
+	pointySphere = new TestModel(m_pD3DDevice, m_pImmediateContext, m_lightManger);
 	pointySphere->LoadObjModel("assets/Sphere.obj");
 	pointySphere->AddTexture("assets/texture.bmp");
 	pointySphere->setMaterial(m_materialManager->getMaterial(test));
@@ -308,10 +312,19 @@ HRESULT Game::InitialiseGraphics()
 	//m_rootNode->addNode(cubeNode);
 	//m_rootNode->addNode(cubeNode2);
 	//m_player = cubeNode2;
+
 	//lights/manager
 	
-	LightManager::getInstance().addLight(XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f), XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f), XMVectorSet(1.0f, 1.0f, 1.0f, 0.0f), 0.0f, 0.0f, 0.0f, 0.0f, DIRECTIONAL_LIGHT);
-	LightManager::getInstance().setAmbientLight(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
+	
+	Light newLight;
+	ZeroMemory(&newLight, sizeof(newLight));
+	newLight.Direction = XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
+	newLight.Colour = XMVectorSet(1.0f, 1.0f, 1.0f, 0.0f);
+	newLight.type = DIRECTIONAL_LIGHT;
+
+	m_lightManger->addLight(newLight);
+
+	m_lightManger->setAmbientLight(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
 	
 	//camera
 	m_camera = &Camera::getInstance();
@@ -426,10 +439,28 @@ void Game::Render()
 		m_pImmediateContext->RSSetState(m_defaultRS);
 	}
 
+	//loop through shaders
+
+	//set shaders
+	m_pImmediateContext->VSSetShader(m_shaders[0]->getVertexShader(), 0, 0);
+	m_pImmediateContext->PSSetShader(m_shaders[0]->getPixelShader(), 0, 0);
+
+	//set inputlayout
+	m_pImmediateContext->IASetInputLayout(m_shaders[0]->getInputLayout());
+
+	//loop objects
+	//draw object
+
 	//render objects
 	m_rootNode->draw(XMMatrixIdentity(), view, projection);
-	cube->Draw(XMMatrixIdentity(), view, projection, m_skybox->getTexture());
-	pointySphere->Draw(XMMatrixIdentity(), view, projection, m_skybox->getTexture());
+	RenderInfo data;
+	data.world = &XMMatrixIdentity();
+	data.view = &view;
+	data.projection = &projection;
+	data.skyboxTexture = m_skybox->getTexture();
+
+	cube->Draw(&data);
+	pointySphere->Draw(&data);
 	//render lights
 
 	// Display what has just been rendered

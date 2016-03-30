@@ -44,6 +44,7 @@ struct Material
 	//////////////////////16 bytes///////////////////////
 };
 
+
 class materialManager
 {
 private:

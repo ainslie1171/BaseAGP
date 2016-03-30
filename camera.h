@@ -1,7 +1,7 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 
-
+//TODO Convert camera class so that is uses a matrix for movement
 
 //#include <math.h>
 #include "maths.h"

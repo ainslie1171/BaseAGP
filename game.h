@@ -10,8 +10,11 @@
 #include "sceneNode.h"
 #include "maths.h"
 #include "skybox.h"
-#include "reflectModel.h"
+//#include "reflectModel.h"
 #include "testModel.h"
+#include "shader.h"
+
+
 class Game
 {
 private:
@@ -38,6 +41,7 @@ private:
 	Model* sphere;
 	TestModel* pointySphere;
 	vector<Model*> m_models;
+	vector<Shader*> m_shaders;
 	Skybox* m_skybox;
 
 	float second;

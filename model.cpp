@@ -19,9 +19,6 @@ Model::~Model()
 	if (m_pTexture) m_pTexture->Release();
 	if (m_pSampler) m_pSampler->Release();
 	if (m_pConstantBuffer) m_pConstantBuffer->Release();
-	if (m_pInputLayout) m_pInputLayout->Release();
-	if (m_pVShader) m_pVShader->Release();
-	if (m_pPShader) m_pPShader->Release();
 	if (m_pObject) { delete m_pObject; m_pObject = nullptr; }
 }
 
@@ -31,66 +28,6 @@ int Model::LoadObjModel(char* fileName)
 
 	m_pObject = new ObjFileModel(fileName, m_pD3DDevice, m_pImmediateContext);
 	if (m_pObject->filename == "FILE NOT LOADED") return S_FALSE;
-
-	//Load and compile pixel and vertex shaders - use vs_5_0 to target DX11 hardware only
-	ID3DBlob *VS,
-		*PS,
-		*error;
-	hr = D3DX11CompileFromFile("modelShader.hlsl", 0, 0, "ModelVS", "vs_4_0", 0, 0, 0, &VS, &error, 0);
-
-	//check for shader compilation error
-	if (error != 0)
-	{
-		OutputDebugStringA((char*)error->GetBufferPointer());
-		error->Release();
-		if (FAILED(hr))//don't fail if error is just a warning
-		{
-			return hr;
-		};
-	}
-
-	hr = D3DX11CompileFromFile("modelShader.hlsl", 0, 0, "ModelPS", "ps_4_0", 0, 0, 0, &PS, &error, 0);
-
-	//check for shader compilation error
-	if (error != 0)
-	{
-		OutputDebugStringA((char*)error->GetBufferPointer());
-		error->Release();
-		if (FAILED(hr))//don't fail if error is just a warning
-		{
-			return hr;
-		};
-	}
-
-	//Create shader objects
-	hr = m_pD3DDevice->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &m_pVShader);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	hr = m_pD3DDevice->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &m_pPShader);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	//Create and set the input layout object
-	D3D11_INPUT_ELEMENT_DESC iedesc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
-
-	hr = m_pD3DDevice->CreateInputLayout(iedesc, ARRAYSIZE(iedesc), VS->GetBufferPointer(), VS->GetBufferSize(), &m_pInputLayout);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
 
 	// setup the constant buffer
 	D3D11_BUFFER_DESC constant_buffer_desc;
@@ -137,7 +74,7 @@ int Model::AddTexture(char* fileName)
 }
 
 
-void Model::Draw(const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection)//, XMVECTOR* cameraPos, LightManager* lightMgr)
+void Model::Draw(const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, LightManager* lightManager)//, XMVECTOR* cameraPos, LightManager* lightMgr)
 {
 	//create constatnt buffer
 	MODEL_CONSTANT_BUFFER model_cb_values;
@@ -150,7 +87,7 @@ void Model::Draw(const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& pr
 	//render lights
 	if (!m_unlit)
 	{
-		LightManager::getInstance().renderLights(world, &model_cb_values);
+		//lightManager->renderLights(world, model_cb_values);
 	}
 	else
 	{
@@ -180,11 +117,11 @@ void Model::Draw(const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& pr
 	m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, 0, &model_cb_values, 0, 0);
 
 	//set shaders
-	m_pImmediateContext->VSSetShader(m_pVShader, 0, 0);
-	m_pImmediateContext->PSSetShader(m_pPShader, 0, 0);
+	m_pImmediateContext->VSSetShader(m_pShader->getVertexShader(), 0, 0);
+	m_pImmediateContext->PSSetShader(m_pShader->getPixelShader(), 0, 0);
 
 	//set inputlayout
-	m_pImmediateContext->IASetInputLayout(m_pInputLayout);
+	m_pImmediateContext->IASetInputLayout(m_pShader->getInputLayout());
 
 	//set pixel shader res
 	//set pixel shader smapler

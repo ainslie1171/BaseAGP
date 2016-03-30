@@ -86,8 +86,11 @@
     <ClCompile Include="maths.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="objfilemodel.cpp" />
-    <ClCompile Include="reflectModel.cpp" />
+    <ClCompile Include="reflectModel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="SceneNode.cpp" />
+    <ClCompile Include="shader.cpp" />
     <ClCompile Include="skybox.cpp" />
     <ClCompile Include="testModel.cpp" />
     <ClCompile Include="text2D.cpp" />
@@ -123,8 +126,11 @@
     <ClInclude Include="maths.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="objfilemodel.h" />
-    <ClInclude Include="reflectModel.h" />
+    <ClInclude Include="reflectModel.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="sceneNode.h" />
+    <ClInclude Include="shader.h" />
     <ClInclude Include="skybox.h" />
     <ClInclude Include="testModel.h" />
     <ClInclude Include="text2D.h" />

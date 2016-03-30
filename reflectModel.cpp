@@ -19,9 +19,6 @@ ReflectModel::~ReflectModel()
 	if (m_pTexture) m_pTexture->Release();
 	if (m_pSampler) m_pSampler->Release();
 	if (m_pConstantBuffer) m_pConstantBuffer->Release();
-	if (m_pInputLayout) m_pInputLayout->Release();
-	if (m_pVShader) m_pVShader->Release();
-	if (m_pPShader) m_pPShader->Release();
 	if (m_pObject) { delete m_pObject; m_pObject = nullptr; }
 }
 
@@ -31,66 +28,6 @@ int ReflectModel::LoadObjModel(char* fileName)
 
 	m_pObject = new ObjFileModel(fileName, m_pD3DDevice, m_pImmediateContext);
 	if (m_pObject->filename == "FILE NOT LOADED") return S_FALSE;
-
-	//Load and compile pixel and vertex shaders - use vs_5_0 to target DX11 hardware only
-	ID3DBlob *VS,
-		*PS,
-		*error;
-	hr = D3DX11CompileFromFile("reflectShader.hlsl", 0, 0, "ModelVS", "vs_4_0", 0, 0, 0, &VS, &error, 0);
-
-	//check for shader compilation error
-	if (error != 0)
-	{
-		OutputDebugStringA((char*)error->GetBufferPointer());
-		error->Release();
-		if (FAILED(hr))//don't fail if error is just a warning
-		{
-			return hr;
-		};
-	}
-
-	hr = D3DX11CompileFromFile("reflectShader.hlsl", 0, 0, "ModelPS", "ps_4_0", 0, 0, 0, &PS, &error, 0);
-
-	//check for shader compilation error
-	if (error != 0)
-	{
-		OutputDebugStringA((char*)error->GetBufferPointer());
-		error->Release();
-		if (FAILED(hr))//don't fail if error is just a warning
-		{
-			return hr;
-		};
-	}
-
-	//Create shader objects
-	hr = m_pD3DDevice->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &m_pVShader);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	hr = m_pD3DDevice->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &m_pPShader);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	//Create and set the input layout object
-	D3D11_INPUT_ELEMENT_DESC iedesc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
-
-	hr = m_pD3DDevice->CreateInputLayout(iedesc, ARRAYSIZE(iedesc), VS->GetBufferPointer(), VS->GetBufferSize(), &m_pInputLayout);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
 
 	// setup the constant buffer
 	D3D11_BUFFER_DESC constant_buffer_desc;
@@ -137,22 +74,23 @@ int ReflectModel::AddTexture(char* fileName)
 }
 
 
-void ReflectModel::Draw(XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, ID3D11ShaderResourceView* skyboxTexture)//, XMVECTOR* cameraPos, LightManager* lightMgr)
+void ReflectModel::Draw(RenderInfo* data)
 {
 	//create constatnt buffer
 	REFLECT_CONSTANT_BUFFER model_cb_values;
 	ZeroMemory(&model_cb_values, sizeof(REFLECT_CONSTANT_BUFFER));
-	world *= XMMatrixTranslation(m_x, m_y, m_z);
+	data->world *= XMMatrixTranslation(m_x, m_y, m_z);
 	//add world view projection
-	model_cb_values.WorldViewProjection = (world)*(view)*(projection);
-	model_cb_values.WorldMatrix = world;
+	model_cb_values.WorldViewProjection = (data->world)*(data->view)*(data->projection);
+	model_cb_values.WorldMatrix = data->world;
 	model_cb_values.cameraPosition = Camera::getInstance().getPosition().getXMVector();
-	model_cb_values.WorldViewMatrix = world * view;
+	model_cb_values.WorldViewMatrix = data->world * data->view;
 
 	//render lights
 	if (!m_unlit)
 	{
-		LightManager::getInstance().renderLights(world, &model_cb_values);
+		m_pLightManager->renderLights(data->world, &model_cb_values);
+		//LightManager::getInstance().renderLights(world, &model_cb_values);
 	}
 	else
 	{
@@ -182,18 +120,18 @@ void ReflectModel::Draw(XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& p
 	
 
 	//set shaders
-	m_pImmediateContext->VSSetShader(m_pVShader, 0, 0);
-	m_pImmediateContext->PSSetShader(m_pPShader, 0, 0);
+	m_pImmediateContext->VSSetShader(m_pShader->getVertexShader(), 0, 0);
+	m_pImmediateContext->PSSetShader(m_pShader->getPixelShader(), 0, 0);
 
 	//set inputlayout
-	m_pImmediateContext->IASetInputLayout(m_pInputLayout);
+	m_pImmediateContext->IASetInputLayout(m_pShader->getInputLayout());
 
 	//set pixel shader res
 	//set pixel shader smapler
 	if (m_pTexture)
 	{
 		m_pImmediateContext->PSSetSamplers(0, 1, &m_pSampler);
-		m_pImmediateContext->PSSetShaderResources(0, 1, &skyboxTexture);
+		m_pImmediateContext->PSSetShaderResources(0, 1, &data->skyboxTexture);
 		m_pImmediateContext->PSSetShaderResources(1, 1, &m_pTexture);
 		
 	}

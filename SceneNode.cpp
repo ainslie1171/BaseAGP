@@ -45,7 +45,7 @@ void SceneNode::draw(const XMMATRIX& parent, const XMMATRIX& view, const XMMATRI
 	worldSpace *= XMMatrixTranslationFromVector(m_position);
 	worldSpace *= parent;
 
-	if (m_pModel) m_pModel->Draw(worldSpace, view, projection);
+	//if (m_pModel) m_pModel->Draw(worldSpace, view, projection);
 
 	for (unsigned int i = 0; i < m_children.size(); i++)
 	{
@@ -67,7 +67,7 @@ void SceneNode::drawBoundingSphere(const XMMATRIX& parent, const XMMATRIX& view,
 	worldSpace *= XMMatrixTranslationFromVector(m_position);
 	worldSpace *= parent;
 
-	if (m_pBoundingModel) m_pBoundingModel->Draw(worldSpace, view, projection);
+	//if (m_pBoundingModel) m_pBoundingModel->Draw(worldSpace, view, projection);
 
 	for (unsigned int i = 0; i < m_children.size(); i++)
 	{

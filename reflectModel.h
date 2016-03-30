@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "objfilemodel.h"
 #include "constantBuffer0.h"
+#include "shader.h"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
@@ -13,6 +14,8 @@ struct ID3D11PixelShader;
 struct ID3D11InputLayout;
 struct ID3D11Buffer;
 
+
+
 class ReflectModel
 {
 private:
@@ -20,14 +23,12 @@ private:
 	ID3D11DeviceContext* m_pImmediateContext;
 
 	ObjFileModel* m_pObject;
-	ID3D11VertexShader* m_pVShader;
-	ID3D11PixelShader* m_pPShader;
-	ID3D11InputLayout* m_pInputLayout;
+	Shader* m_pShader;
 	ID3D11Buffer* m_pConstantBuffer;
 	ID3D11ShaderResourceView* m_pTexture;
 	ID3D11SamplerState* m_pSampler;
 	Material*	m_pMaterial;
-	
+	LightManager* m_pLightManager;
 
 	float m_x, m_y, m_z,
 		m_xAngle, m_yAngle, m_zAngle,
@@ -45,7 +46,7 @@ public:
 	~ReflectModel();
 	int LoadObjModel(char* fileName);
 	//Don't worry, this class is going to be re-made
-	void Draw(XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, ID3D11ShaderResourceView* skyboxTexture);
+	void Draw(RenderInfo* data);
 	int AddTexture(char* fileName);
 	void setMaterial(Material* material){ m_pMaterial = material; }
 	void setXPos(float XPos){ m_x = XPos; }
