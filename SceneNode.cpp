@@ -36,42 +36,58 @@ bool SceneNode::removeNode(SceneNode* node)
 	return false;
 }
 
-void SceneNode::draw(const XMMATRIX& parent, const XMMATRIX& view, const XMMATRIX& projection)
+void SceneNode::draw(RENDER_DESC& desc)
 {
-	XMMATRIX worldSpace = XMMatrixIdentity();
+	XMMATRIX WorldSpace = XMMatrixScalingFromVector(m_scale);
+	WorldSpace *= XMMatrixRotationRollPitchYawFromVector(m_rotation);
+	WorldSpace *= XMMatrixTranslationFromVector(m_position);
+	WorldSpace *= (*desc.world);
 
-	worldSpace = XMMatrixScalingFromVector(m_scale);
-	worldSpace *= XMMatrixRotationRollPitchYawFromVector(m_rotation);
-	worldSpace *= XMMatrixTranslationFromVector(m_position);
-	worldSpace *= parent;
+	RENDER_DESC modelDesc = desc;
+	modelDesc.world = &WorldSpace;
 
-	//if (m_pModel) m_pModel->Draw(worldSpace, view, projection);
+	if (m_pModel)
+	{
+		m_pModel->Draw(modelDesc);
+		desc.targetShader = modelDesc.targetShader;
+		desc.targetTexture = modelDesc.targetTexture;
+	}
 
 	for (unsigned int i = 0; i < m_children.size(); i++)
 	{
-		m_children[i]->draw(worldSpace, view, projection);
+		m_children[i]->draw(modelDesc);
 	}
 	
 }
 
-void SceneNode::drawBoundingSphere(const XMMATRIX& parent, const XMMATRIX& view, const XMMATRIX& projection)
+void SceneNode::drawBoundingSphere(RENDER_DESC& desc)
 {
 	XMMATRIX worldSpace = XMMatrixIdentity();
+	RENDER_DESC modelDesc = desc;
+	modelDesc.world = &worldSpace;
 
 	float scale = 1.0f;
 	if(m_pModel) scale = m_pModel->GetBoundingSphereRadius();
 	if(m_pBoundingModel) scale /= m_pBoundingModel->GetBoundingSphereRadius();
 	scale *= m_scale.x;
-	worldSpace = XMMatrixScaling(scale, scale, scale);
-	worldSpace *= XMMatrixRotationRollPitchYawFromVector(m_rotation);
-	worldSpace *= XMMatrixTranslationFromVector(m_position);
-	worldSpace *= parent;
 
-	//if (m_pBoundingModel) m_pBoundingModel->Draw(worldSpace, view, projection);
+	*modelDesc.world = XMMatrixScaling(scale, scale, scale);
+	*modelDesc.world *= XMMatrixRotationRollPitchYawFromVector(m_rotation);
+	*modelDesc.world *= XMMatrixTranslationFromVector(m_position);
+	*modelDesc.world *= (*desc.world);
 
+
+	if (m_pBoundingModel)
+	{
+		m_pBoundingModel->Draw(modelDesc);
+		desc.targetShader = modelDesc.targetShader;
+		desc.targetTexture = modelDesc.targetTexture;
+	}
+
+	
 	for (unsigned int i = 0; i < m_children.size(); i++)
 	{
-		m_children[i]->drawBoundingSphere(worldSpace, view, projection);
+		m_children[i]->drawBoundingSphere(modelDesc);
 	}
 }
 
@@ -91,12 +107,11 @@ void SceneNode::updateCollisionTree(XMMATRIX* parentWorld, XMVECTOR parentScale)
 
 	m_worldScale = parentScale * m_scale;
 
-	XMVECTOR boundingSpherePosition = XMVectorZero();
+	XMVECTOR boundingSpherePosition2,s,r;
+	XMMatrixDecompose(&s, &r, &boundingSpherePosition2, m_worldSpace);
 
-	if (m_pModel)
-		boundingSpherePosition = m_pModel->GetBoundingSphereWorldSpacePosition();
 
-	m_worldCenter = XMVector3Transform(boundingSpherePosition, m_worldSpace);
+	m_worldCenter = boundingSpherePosition2;
 
 	for (SceneNode* node : m_children)
 	{
@@ -118,26 +133,21 @@ bool SceneNode::checkCollision(SceneNode* compareTree, SceneNode* objectTreeRoot
 			radius = (m_pModel->GetBoundingSphereRadius() * m_worldScale.x) + compTreeRadius;
 
 		radius *= radius;
+
 		if (distance < radius)
 		{
 			ObjFileModel *model = compareTree->m_pModel->getObject();
+			Vector4 vertexA, vertexB, vertexC;
 			for (unsigned int i = 0; i < model->numverts; i += 3)
 			{
-				XMVECTOR vertexA = XMVectorSet(model->vertices[i].Pos.x,
-					model->vertices[i].Pos.y,
-					model->vertices[i].Pos.z, 0.0f);
+				vertexA = model->vertices[i].Pos;
+				vertexB = model->vertices[i+1].Pos;
+				vertexC = model->vertices[i+2].Pos;
 
-				XMVECTOR vertexB = XMVectorSet(model->vertices[i + 1].Pos.x,
-					model->vertices[i + 1].Pos.y,
-					model->vertices[i + 1].Pos.z, 0.0f);
 
-				XMVECTOR vertexC = XMVectorSet(model->vertices[i + 2].Pos.x,
-					model->vertices[i + 2].Pos.y,
-					model->vertices[i + 2].Pos.z, 0.0f);
-
-				vertexA = XMVector3Transform(vertexA, compareTree->m_worldSpace);
-				vertexB = XMVector3Transform(vertexB, compareTree->m_worldSpace);
-				vertexC = XMVector3Transform(vertexC, compareTree->m_worldSpace);
+				vertexA = XMVector3Transform(vertexA.getXMVector(), compareTree->m_worldSpace);
+				vertexB = XMVector3Transform(vertexB.getXMVector(), compareTree->m_worldSpace);
+				vertexC = XMVector3Transform(vertexC.getXMVector(), compareTree->m_worldSpace);
 				
 				if (checkCollisionRaySphere(vertexA, vertexB, false))
 					return true;
@@ -153,21 +163,13 @@ bool SceneNode::checkCollision(SceneNode* compareTree, SceneNode* objectTreeRoot
 			model = m_pModel->getObject();
 			for (unsigned int i = 0; i < model->numverts; i += 3)
 			{
-				XMVECTOR vertexA = XMVectorSet(model->vertices[i].Pos.x,
-					model->vertices[i].Pos.y,
-					model->vertices[i].Pos.z, 0.0f);
+				vertexA = model->vertices[i].Pos;
+				vertexB = model->vertices[i + 1].Pos;
+				vertexC = model->vertices[i + 2].Pos;
 
-				XMVECTOR vertexB = XMVectorSet(model->vertices[i + 1].Pos.x,
-					model->vertices[i + 1].Pos.y,
-					model->vertices[i + 1].Pos.z, 0.0f);
-
-				XMVECTOR vertexC = XMVectorSet(model->vertices[i + 2].Pos.x,
-					model->vertices[i + 2].Pos.y,
-					model->vertices[i + 2].Pos.z, 0.0f);
-
-				vertexA = XMVector3Transform(vertexA, m_worldSpace);
-				vertexB = XMVector3Transform(vertexB, m_worldSpace);
-				vertexC = XMVector3Transform(vertexC, m_worldSpace);
+				vertexA = XMVector3Transform(vertexA.getXMVector(), m_worldSpace);
+				vertexB = XMVector3Transform(vertexB.getXMVector(), m_worldSpace);
+				vertexC = XMVector3Transform(vertexC.getXMVector(), m_worldSpace);
 				
 				if (compareTree->checkCollisionRaySphere(vertexA, vertexB, false))
 					return true;
@@ -251,13 +253,12 @@ bool SceneNode::checkCollisionRaySphere(const Vector4& rayPointA, const Vector4&
 {
 	if (m_pModel)
 	{
-		//float distanceSqr = distanceBetweenVectorsSqr(rayPointB, m_worldCenter);
-		//float rayLengthRadiusSqr = distanceBetweenVectors(rayPointA, rayPointB) + (m_pModel->GetBoundingSphereRadius() * m_worldScale.x);// *m_worldScale.x));
-		//rayLengthRadiusSqr *= rayLengthRadiusSqr;
-
 		float distanceSqr = distanceBetweenVectorsSqr(rayPointB, m_worldCenter);
+
 		float rayLengthRadiusSqr = m_pModel->GetBoundingSphereRadius() * m_worldScale.x;
+
 		rayLengthRadiusSqr *= rayLengthRadiusSqr;
+
 		if (distanceSqr <= rayLengthRadiusSqr)
 		{
 			if (checkCollisionRay(rayPointA, rayPointB))
@@ -278,7 +279,31 @@ bool SceneNode::checkCollisionRaySphere(const Vector4& rayPointA, const Vector4&
 
 bool SceneNode::checkCollisionRay(const Vector4& rayPointA, const Vector4& rayPointB)
 {
-	
+	Vector4 ray = rayPointA - rayPointB;
+	XMVECTOR determinant;
+	XMMATRIX inverse = XMMatrixInverse(&determinant, m_worldSpace);
+	Vector4 pointA = XMVector3Transform(rayPointA.getXMVector(), inverse);
+	ObjFileModel *model = m_pModel->getObject();
+	Triangle triangle;
+	Vector4 intersection;
+	for (unsigned int i = 0; i < model->numverts; i += 3)
+	{
+
+		triangle = { 
+				model->vertices[i].Pos,
+				model->vertices[i+1].Pos,
+				model->vertices[i+2].Pos };
+
+		if (planeRayIntersection(calculatePlane(triangle), pointA, ray, intersection))
+		{
+			if (trianglePointIntersection(triangle, intersection))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+	/*
 	ObjFileModel *model = m_pModel->getObject();
 	for (unsigned int i = 0; i < model->numverts; i+=3)
 	{
@@ -310,4 +335,5 @@ bool SceneNode::checkCollisionRay(const Vector4& rayPointA, const Vector4& rayPo
 		}
 	}
 	return false;
+	*/
 }

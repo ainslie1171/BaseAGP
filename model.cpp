@@ -1,23 +1,22 @@
 #include "model.h"
 
-Model::Model(ID3D11Device* device, ID3D11DeviceContext* context)
+Model::Model(const MODEL_DESC& desc)
 {
-	m_pD3DDevice = device;
-	m_pImmediateContext = context;
-	m_x = 0.0f;
-	m_y = 0.0f;
-	m_z = 0.0f;
-	m_xAngle = 0.0f;
-	m_yAngle = 0.0f;
-	m_zAngle = 0.0f;
+	m_pD3DDevice = desc.device;
+	m_pImmediateContext = desc.context;
+	m_pLightManager = desc.lightManager;
+	m_pShaderManager = desc.shaderManager;
+	m_pTextureManager = desc.textureManager;
+	LoadObjModel(desc.filePath);
+	m_shaderID = desc.targetShader;
+	m_textureID = desc.targetTexture;
+	m_pMaterial = desc.material;
 	m_scale = 1.0f;
 }
 
 //13
 Model::~Model()
 {
-	if (m_pTexture) m_pTexture->Release();
-	if (m_pSampler) m_pSampler->Release();
 	if (m_pConstantBuffer) m_pConstantBuffer->Release();
 	if (m_pObject) { delete m_pObject; m_pObject = nullptr; }
 }
@@ -33,7 +32,7 @@ int Model::LoadObjModel(char* fileName)
 	D3D11_BUFFER_DESC constant_buffer_desc;
 	ZeroMemory(&constant_buffer_desc, sizeof(constant_buffer_desc));
 	constant_buffer_desc.Usage = D3D11_USAGE_DEFAULT; //Can use UpdateSubresourse() to update
-	constant_buffer_desc.ByteWidth = sizeof(MODEL_CONSTANT_BUFFER); //MUST be a multiple of 16, calculated from the constant buffer struct
+	constant_buffer_desc.ByteWidth = sizeof(REFLECT_CONSTANT_BUFFER); //MUST be a multiple of 16, calculated from the constant buffer struct
 	constant_buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; //Use as a constant buffer
 
 	//create the constant buffer
@@ -50,104 +49,48 @@ int Model::LoadObjModel(char* fileName)
 	return S_OK;
 }
 
-int Model::AddTexture(char* fileName)
+
+void Model::Draw(RENDER_DESC& desc)
 {
-	HRESULT hr = S_OK;
-	D3DX11CreateShaderResourceViewFromFile(m_pD3DDevice, fileName, NULL, NULL, &m_pTexture, NULL);
-	//Craete the Sampler State
-	D3D11_SAMPLER_DESC sampler_desc;
-	ZeroMemory(&sampler_desc, sizeof(sampler_desc));
-	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	if (m_textureID != desc.targetTexture) updateTexture(desc);
+	if (m_shaderID != desc.targetShader) updateShader(desc);
 
-	hr = m_pD3DDevice->CreateSamplerState(&sampler_desc, &m_pSampler);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	return S_OK;
-}
-
-
-void Model::Draw(const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, LightManager* lightManager)//, XMVECTOR* cameraPos, LightManager* lightMgr)
-{
 	//create constatnt buffer
-	MODEL_CONSTANT_BUFFER model_cb_values;
-	ZeroMemory(&model_cb_values, sizeof(MODEL_CONSTANT_BUFFER));
+	REFLECT_CONSTANT_BUFFER model_cb_values;
+	ZeroMemory(&model_cb_values, sizeof(REFLECT_CONSTANT_BUFFER));
 	//add world view projection
-	model_cb_values.WorldViewProjection = (world)*(view)*(projection);
-	model_cb_values.WorldMatrix = world;
-	model_cb_values.cameraPosition = Camera::getInstance().getPosition().getXMVector();
+	model_cb_values.WorldViewProjection = (*desc.world)*(*desc.view)*(*desc.projection);
+	model_cb_values.WorldMatrix = *desc.world;
+	model_cb_values.cameraPosition = *desc.camera;
+	model_cb_values.WorldViewMatrix = (*desc.world) * (*desc.view);
+
+	
 
 	//render lights
-	if (!m_unlit)
-	{
-		//lightManager->renderLights(world, model_cb_values);
-	}
-	else
-	{
-		model_cb_values.ambient_light_colour = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
-	}
+	model_cb_values.ambient_light_colour = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
 
+	if (!m_unlit)
+		m_pLightManager->renderLights(*desc.world, &model_cb_values);
 
 	//material stuff
 	if (m_pMaterial)
 	{
+		m_pMaterial->useTexture = (desc.targetTexture > 0 ? 1 : 0);
 		model_cb_values.material = *m_pMaterial;
-		if (m_pTexture)
-		{
-			m_pMaterial->useTexture = true;
-		}
-		else
-		{
-			m_pMaterial->useTexture = false;
-		}
 	}
-	
-
-	//Vertex shader c buffer
-	m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pConstantBuffer);
-
 	//update 
 	m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, 0, &model_cb_values, 0, 0);
 
-	//set shaders
-	m_pImmediateContext->VSSetShader(m_pShader->getVertexShader(), 0, 0);
-	m_pImmediateContext->PSSetShader(m_pShader->getPixelShader(), 0, 0);
 
-	//set inputlayout
-	m_pImmediateContext->IASetInputLayout(m_pShader->getInputLayout());
 
-	//set pixel shader res
-	//set pixel shader smapler
-	if (m_pTexture)
-	{
-		m_pImmediateContext->PSSetSamplers(0, 1, &m_pSampler);
-		m_pImmediateContext->PSSetShaderResources(0, 1, &m_pTexture);
-	}
+	//Vertex shader c buffer
+	m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pConstantBuffer);
+	m_pImmediateContext->PSSetConstantBuffers(0, 1, &m_pConstantBuffer);
+	
+	m_pImmediateContext->PSSetShaderResources(1, 1, &desc.skyboxTexture);
 
 	//draw
 	m_pObject->Draw();
-	
-}
-
-void Model::LookAt_XZ(float x, float z)
-{
-	float	dx = m_x - x,
-			dz = m_z - z;
-
-	m_yAngle = atan2(dx, dz) * (180.0f / XM_PI);
-}
-
-void Model::MoveForward(float distance)
-{
-	m_x += sin(m_yAngle * (XM_PI / 180.0f)) * distance;
-	m_z += cos(m_yAngle * (XM_PI / 180.0f)) * distance;
 }
 
 void Model::CalculateModelCenterPoint()
@@ -164,64 +107,63 @@ void Model::CalculateModelCenterPoint()
 		if (maxZ < m_pObject->vertices[i].Pos.z) maxZ = m_pObject->vertices[i].Pos.z;
 		if (minZ > m_pObject->vertices[i].Pos.z) minZ = m_pObject->vertices[i].Pos.z;
 	}
-	m_boundingSphereCenterX = minX + ((maxX - minX) / 2);
-	m_boundingSphereCenterY = minY + ((maxY - minY) / 2);
-	m_boundingSphereCenterZ = minZ + ((maxZ - minZ) / 2);
+	m_boundingShpere.x = minX + ((maxX - minX) / 2);
+	m_boundingShpere.y = minY + ((maxY - minY) / 2);
+	m_boundingShpere.z = minZ + ((maxZ - minZ) / 2);
 }
 
 void Model::CalculateBoundingSphereRadius()
 {
-	m_boundingSphereRadius = 0;
+	m_boundingShpere.w = 0;
 	float	dx, dy, dz;
 	for (unsigned int i = 0; i < m_pObject->numverts; i++)
 	{
-		dx = pow(m_pObject->vertices[i].Pos.x - m_boundingSphereCenterX, 2);
-		dy = pow(m_pObject->vertices[i].Pos.y - m_boundingSphereCenterY, 2);
-		dz = pow(m_pObject->vertices[i].Pos.z - m_boundingSphereCenterZ, 2);
-		if ((dx + dy + dz) > m_boundingSphereRadius)
-			m_boundingSphereRadius = (dx + dy + dz);
+		dx = pow(m_pObject->vertices[i].Pos.x - m_boundingShpere.x, 2);
+		dy = pow(m_pObject->vertices[i].Pos.y - m_boundingShpere.y, 2);
+		dz = pow(m_pObject->vertices[i].Pos.z - m_boundingShpere.z, 2);
+		if ((dx + dy + dz) > m_boundingShpere.w)
+			m_boundingShpere.w = (dx + dy + dz);
 	}
-	m_boundingSphereRadius = sqrtf(m_boundingSphereRadius);// = sqrtf(m_boundingSphereRadius);
-}
-
-XMVECTOR Model::GetBoundingSphereWorldSpacePosition()
-{
-	XMMATRIX world;
-	world = XMMatrixRotationX(XMConvertToRadians(m_xAngle));
-	world *= XMMatrixRotationY(XMConvertToRadians(m_yAngle));
-	world *= XMMatrixRotationZ(XMConvertToRadians(m_zAngle));
-	world *= XMMatrixScaling(m_scale, m_scale, m_scale);
-	world *= XMMatrixTranslation(m_x, m_y, m_z);
-
-	XMVECTOR offset;
-	offset = XMVectorSet(m_boundingSphereCenterX, m_boundingSphereCenterY, m_boundingSphereCenterZ, 0.0f);
-	offset = XMVector3Transform(offset, world);
-	return offset;
+	m_boundingShpere.w = sqrtf(m_boundingShpere.w);
 }
 
 float Model::GetBoundingSphereRadius()
 {
-	//float result = sqrtf(m_boundingSphereRadius);//r2=9, result=3, =6
-	return m_boundingSphereRadius;// *= m_scale;
+	return m_boundingShpere.w;
 }
 
 float Model::GetBoundingSphereRadiusSqr()
 {
-	return m_boundingSphereRadius;// *= (m_scale*m_scale); //r2=9, 18
+	return m_boundingShpere.w * m_boundingShpere.w;
 }
 
-bool Model::checkCollision(Model* model)
+void Model::updateShader(RENDER_DESC& desc)
 {
-	if (model == this) return false;
-
-	float distanceSquared = (pow((m_x - model->getXPos()), 2) + pow((m_y - model->getYPos()), 2) + pow((m_z - model->getZPos()), 2));
-
-	if (distanceSquared < pow(m_boundingSphereRadius + model->GetBoundingSphereRadius(), 2))
+	Shader s;
+	if (!m_pShaderManager->getShader(m_shaderID, &s))
 	{
-		return true;
+		if (m_shaderID != 0) OutputDebugString("Failed to retrieve shader\n");
 	}
 	else
 	{
-		return false;
+		m_pImmediateContext->VSSetShader(s.VShader, 0, 0);
+		m_pImmediateContext->PSSetShader(s.PShader, 0, 0);
+		m_pImmediateContext->IASetInputLayout(s.InputLayout);
 	}
+	desc.targetShader = m_shaderID;
+}
+
+void Model::updateTexture(RENDER_DESC& desc)
+{
+	Texture t;
+	if (!m_pTextureManager->getTexture(m_textureID, &t))
+	{
+		if (m_textureID != 0) OutputDebugString("Failed to retrieve texture");
+	}
+	else
+	{
+		m_pImmediateContext->PSSetSamplers(0, 1, &t.m_pSampler);
+		m_pImmediateContext->PSSetShaderResources(0, 1, &t.m_pTexture);
+	}
+	desc.targetTexture = m_textureID;
 }

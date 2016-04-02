@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "objfilemodel.h"
 #include "constantBuffer0.h"
+#include "shaderManager.h"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
@@ -21,22 +22,32 @@ struct RenderInfo
 	ID3D11ShaderResourceView* skyboxTexture;
 };
 
+struct testModelDesc
+{
+	ID3D11Device* device;
+	ID3D11DeviceContext* context;
+	LightManager* lightManager;
+	ShaderManager* shaderManager;
+};
+
 class TestModel
 {
 private:
 	ID3D11Device* m_pD3DDevice;
 	ID3D11DeviceContext* m_pImmediateContext;
-
-	ObjFileModel* m_pObject;
-	ID3D11VertexShader* m_pVShader;
-	ID3D11PixelShader* m_pPShader;
-	ID3D11InputLayout* m_pInputLayout;
 	ID3D11Buffer* m_pConstantBuffer;
-	ID3D11ShaderResourceView* m_pTexture;
-	ID3D11SamplerState* m_pSampler;
-	Material*	m_pMaterial;
-	LightManager* m_pLightManager;
 	
+	ObjFileModel* m_pObject;
+	Material*	m_pMaterial;
+		
+	LightManager* m_pLightManager;
+	ShaderManager* m_pShaderManager;
+	
+	XMMATRIX m_transform;
+
+	static const XMVECTOR xAxis;
+	static const XMVECTOR yAxis;
+	static const XMVECTOR zAxis;
 
 	float m_x, m_y, m_z,
 		m_xAngle, m_yAngle, m_zAngle,
@@ -51,8 +62,9 @@ private:
 
 	void CalculateModelCenterPoint();
 	void CalculateBoundingSphereRadius();
+
 public:
-	TestModel(ID3D11Device* device, ID3D11DeviceContext* context, LightManager* lightManager);
+	TestModel(const testModelDesc& desc);
 	~TestModel();
 	int LoadObjModel(char* fileName);
 	//Don't worry, this class is going to be re-made

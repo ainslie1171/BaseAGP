@@ -49,5 +49,9 @@ materialManager::materialManager()
 
 materialManager::~materialManager()
 {
-	m_Materials.clear();
+	while (!m_Materials.empty())
+	{
+		delete m_Materials.back();
+		m_Materials.pop_back();
+	}
 }

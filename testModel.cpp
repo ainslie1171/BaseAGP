@@ -1,9 +1,13 @@
 #include "testModel.h"
 
-TestModel::TestModel(ID3D11Device* device, ID3D11DeviceContext* context, LightManager* lightManager)
+const XMVECTOR TestModel::xAxis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+const XMVECTOR TestModel::yAxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+const XMVECTOR TestModel::zAxis = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+
+TestModel::TestModel(const testModelDesc& desc)
 {
-	m_pD3DDevice = device;
-	m_pImmediateContext = context;
+	m_pD3DDevice = desc.device;
+	m_pImmediateContext = desc.context;
 	m_x = 0.0f;
 	m_y = 0.0f;
 	m_z = 0.0f;
@@ -11,18 +15,17 @@ TestModel::TestModel(ID3D11Device* device, ID3D11DeviceContext* context, LightMa
 	m_yAngle = 0.0f;
 	m_zAngle = 0.0f;
 	m_scale = 1.0f;
-	m_pLightManager = lightManager;
+	m_pLightManager = desc.lightManager;
+	m_pShaderManager = desc.shaderManager;
+
+	m_transform = XMMatrixIdentity();
+	m_transform *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
 }
 
 //13
 TestModel::~TestModel()
 {
-	if (m_pTexture) m_pTexture->Release();
-	if (m_pSampler) m_pSampler->Release();
 	if (m_pConstantBuffer) m_pConstantBuffer->Release();
-	if (m_pInputLayout) m_pInputLayout->Release();
-	if (m_pVShader) m_pVShader->Release();
-	if (m_pPShader) m_pPShader->Release();
 	if (m_pObject) { delete m_pObject; m_pObject = nullptr; }
 }
 
@@ -32,8 +35,6 @@ int TestModel::LoadObjModel(char* fileName)
 
 	m_pObject = new ObjFileModel(fileName, m_pD3DDevice, m_pImmediateContext);
 	if (m_pObject->filename == "FILE NOT LOADED") return S_FALSE;
-
-	
 
 	// setup the constant buffer
 	D3D11_BUFFER_DESC constant_buffer_desc;
@@ -140,6 +141,7 @@ void TestModel::Draw(RenderInfo* data)
 
 void TestModel::LookAt_XZ(float x, float z)
 {
+
 	float	dx = m_x - x,
 			dz = m_z - z;
 

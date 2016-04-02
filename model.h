@@ -5,74 +5,86 @@
 #include "lightManager.h"
 #include "camera.h"
 #include "materialManager.h"
-#include "shader.h"
+#include "shaderManager.h"
+#include "textureManager.h"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11Buffer;
+
+struct RENDER_DESC
+{
+	XMVECTOR* camera;
+	XMMATRIX* world;
+	XMMATRIX* view;
+	XMMATRIX* projection;
+	ID3D11ShaderResourceView* skyboxTexture;
+	unsigned int targetShader;
+	unsigned int targetTexture;
+};
+
+struct MODEL_DESC
+{
+	ID3D11Device* device;
+	ID3D11DeviceContext* context;
+	LightManager* lightManager;
+	ShaderManager* shaderManager;
+	TextureManager* textureManager;
+	char* filePath;
+	unsigned int targetShader;
+	unsigned int targetTexture;
+	Material* material;
+};
 
 class Model
 {
 private:
 	ID3D11Device* m_pD3DDevice;
 	ID3D11DeviceContext* m_pImmediateContext;
+	ID3D11Buffer* m_pConstantBuffer;
 
 	ObjFileModel* m_pObject;
-	Shader*		m_pShader;
-	ID3D11Buffer* m_pConstantBuffer;
-	ID3D11ShaderResourceView* m_pTexture;
-	ID3D11SamplerState* m_pSampler;
 	Material*	m_pMaterial;
+
+	LightManager* m_pLightManager;
+	ShaderManager* m_pShaderManager;
+	TextureManager* m_pTextureManager;
 	
-	//TODO clean up member variables in the model class
-	float m_x, m_y, m_z,
-		m_xAngle, m_yAngle, m_zAngle,
-		m_scale,
-		m_boundingSphereCenterX,
-		m_boundingSphereCenterY,
-		m_boundingSphereCenterZ,
-		m_boundingSphereRadius;
+	Vector4 m_boundingShpere;
+
+	float m_scale;
 	bool m_unlit;
+	unsigned int m_shaderID;
+	unsigned int m_textureID;
 
 	void CalculateModelCenterPoint();
 	void CalculateBoundingSphereRadius();
-public:
-	Model(ID3D11Device* device, ID3D11DeviceContext* context);
-	~Model();
 	int LoadObjModel(char* fileName);
-	//Don't worry, this class is going to be re-made
-	void Draw(const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, LightManager* lightManager);
-	int AddTexture(char* fileName);
+	void updateShader(RENDER_DESC& desc);
+	void updateTexture(RENDER_DESC& desc);
+
+public:
+	Model(const MODEL_DESC& desc);
+	~Model();
+	
+	ObjFileModel* getObject(){ return m_pObject; }
+
+	void Draw(RENDER_DESC& desc);
+
 	void setMaterial(Material* material){ m_pMaterial = material; }
-	void setXPos(float XPos){ m_x = XPos; }
-	void setYPos(float YPos){ m_y = YPos; }
-	void setZPos(float ZPos){ m_z = ZPos; }
-	void setXAngle(float XAngle){ m_xAngle = XAngle; }
-	void setYAngle(float YAngle){ m_yAngle = YAngle; }
-	void setZAngle(float ZAngle){ m_zAngle = ZAngle; }
+
 	void setScale(float scale){ m_scale = scale; }
-	float getXPos() { return m_x; }
-	float getYPos() { return m_y; }
-	float getZPos() { return m_z; }
-	float getXAngle() { return m_xAngle; }
-	float getYAngle() { return m_yAngle; }
-	float getZAngle() { return m_zAngle; }
 	float getScale() { return m_scale; }
-	void IncXPos(float inc){ m_x += inc; }
-	void IncYPos(float inc){ m_y += inc; }
-	void IncZPos(float inc){ m_z += inc; }
-	void IncXAngle(float inc){ m_xAngle += inc; }
-	void IncYAngle(float inc){ m_yAngle += inc; }
-	void IncZAngle(float inc){ m_zAngle += inc; }
-	void IncScale(float inc){ m_scale += inc; }
-	void LookAt_XZ(float x, float z);
-	void MoveForward(float distance);
-	XMVECTOR GetBoundingSphereWorldSpacePosition();
+
 	float GetBoundingSphereRadius();
 	float GetBoundingSphereRadiusSqr();
-	bool checkCollision(Model* model);
-	ObjFileModel* getObject(){ return m_pObject; }
+
+	unsigned int getShaderID(){ return m_shaderID; }
+	unsigned int getTextureID(){ return m_textureID; }
+
 	void toggleUnlit(bool t){ m_unlit = t; }
+
+	
 };
 
 #endif	_MODEL_H_

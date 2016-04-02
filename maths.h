@@ -116,6 +116,14 @@ struct Vector4
 		w = rhs.w;
 	}
 
+	Vector4(const XMFLOAT3 &rhs)
+	{
+		x = rhs.x;
+		y = rhs.y;
+		z = rhs.z;
+		w = 0;
+	}
+
 	bool operator!=(const Vector4 &rhs)
 	{
 		return !(*this == rhs);
@@ -153,6 +161,7 @@ Plane calculatePlane(const Triangle& triangle);
 int planeEquation(const Plane& plane, const Vector4& point);
 int sign(float number);
 bool planeIntersection(const Plane& plane, const Vector4& pointA, const Vector4& pointB, Vector4& intersection);//this is acommenr
+bool planeRayIntersection(const Plane& plane, const Vector4& start, const Vector4& direction, Vector4& intersection);
 bool trianglePointIntersection(const Triangle& triangle, const Vector4& point);
 float distanceBetweenVectors(const Vector4& vector1, const Vector4& vector2);
 float distanceBetweenVectorsSqr(const Vector4& vector1, const Vector4& vector2);

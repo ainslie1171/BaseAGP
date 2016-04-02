@@ -4,43 +4,22 @@ Game::Game(HINSTANCE hInstance)
 {
 	m_hInst = hInstance;
 	strncpy_s(m_TutorialName, "SWD304 - Tutorial 15 Exercise 01\0", 100);
-
-	//Testing maths things
-	Triangle triangle;
-
-	triangle.vertexA.x = 0;
-	triangle.vertexA.y = 2;
-	triangle.vertexA.z = 0;
-	triangle.vertexB.x = 3;
-	triangle.vertexB.y = 2;
-	triangle.vertexB.z = 3;
-	triangle.vertexC.x = 3;
-	triangle.vertexC.y = 2;
-	triangle.vertexC.z = 0;
-
-	Plane plane = calculatePlane(triangle);
-	XMVECTOR s = triangle.vertexC.getXMVector();
-	Vector4 a = s;
-	int result = planeEquation(plane, { 1, 2, -2 });
-	result = planeEquation(plane, Vector4( 1, 3, -2 ));
-	result = planeEquation(plane, { 1, 0, -2 });
-	Vector4 intersectionResult;
-	bool piResult = planeIntersection(plane, { 1, 3, -2 }, { 1, 0, -2 }, intersectionResult);
-
-	result = planeEquation(plane, { 10, 2, 10 });
-	piResult = trianglePointIntersection(triangle, { 10, 2, 10 });
-	piResult = trianglePointIntersection(triangle, { 10, 10, 10 });
-	piResult = trianglePointIntersection(triangle, { 1, 2, 1 });
 }
 
 Game::~Game()
 {
 	
 	if (m_2DText) { delete m_2DText; m_2DText = nullptr; }
-	if (m_materialManager){ delete m_materialManager; m_materialManager = nullptr; }
+
+	if (pointySphere) { delete pointySphere; pointySphere = nullptr; }
+	if (sphere) { delete sphere; sphere = nullptr; }
 	if (cube) { delete cube; cube = nullptr; }
 	if (m_rootNode) { delete m_rootNode; m_rootNode = nullptr; }
-	
+	if (m_skybox){ delete m_skybox; m_skybox = nullptr; }
+	if (m_materialManager){ delete m_materialManager; m_materialManager = nullptr; }
+	if (m_lightManger){ delete m_lightManger; m_lightManger = nullptr; }
+	if (m_shaderManager){ delete m_shaderManager; m_shaderManager = nullptr; }
+	if (m_textureManager){ delete m_textureManager; m_textureManager = nullptr; }
 
 	if (m_pZBuffer) m_pZBuffer->Release();//06-01b
 
@@ -260,15 +239,21 @@ HRESULT Game::InitialiseGraphics()
 {
 	//HRESULT hr = S_OK;
 
-	Shader* s = new Shader(m_pD3DDevice, "testShader.hlsl");
-	m_shaders.push_back(s);
+	//Shader* s = new Shader(m_pD3DDevice, "modelShader.hlsl");
+	//m_shaders.push_back(s);
+
+	m_textureManager = new TextureManager(m_pD3DDevice);
+	m_textureManager->add("assets/texture.bmp");
+	m_textureManager->add("assets/yellow.bmp");
+
+	m_shaderManager = new ShaderManager(m_pD3DDevice);
+
+	m_shaderManager->add("modelShader.hlsl");
+	m_shaderManager->add("testShader.hlsl");
 	m_lightManger = new LightManager();
+
 	//Materials
 	m_materialManager = new materialManager();
-	Material* white = m_materialManager->getMaterial(WhitePlastic);
-	//objects
-	m_rootNode = new SceneNode();
-
 
 	SKYBOX_DESC sbDesc;
 	ZeroMemory(&sbDesc, sizeof(sbDesc));
@@ -277,41 +262,60 @@ HRESULT Game::InitialiseGraphics()
 	sbDesc.textureFilepath = "assets/skybox02.dds";
 	m_skybox = new Skybox(sbDesc);
 
+	//objects
+	m_rootNode = new SceneNode();
+	
+	MODEL_DESC cubeDesc;
+	ZeroMemory(&cubeDesc, sizeof(cubeDesc));
+	cubeDesc.context = m_pImmediateContext;
+	cubeDesc.device = m_pD3DDevice;
+	cubeDesc.lightManager = m_lightManger;
+	cubeDesc.shaderManager = m_shaderManager;
+	cubeDesc.textureManager = m_textureManager;
+	cubeDesc.filePath = "assets/cube.obj";
+	cubeDesc.targetTexture = 1;
+	cubeDesc.targetShader = 2;
+	cubeDesc.material = m_materialManager->getMaterial(WhitePlastic);
 
-	cube = new TestModel(m_pD3DDevice, m_pImmediateContext, m_lightManger);
-	cube->LoadObjModel("assets/cube.obj");
-	cube->AddTexture("assets/yellow.bmp");
-	cube->setMaterial(m_materialManager->getMaterial(WhitePlastic));
+	cube = new Model(cubeDesc);
+	//cube->LoadObjModel("assets/cube.obj");
+	//cube->AddTexture("assets/yellow.bmp");
+	//cube->setMaterial(m_materialManager->getMaterial(WhitePlastic));
 	//cube->toggleUnlit(true);
 	//m_models.push_back(cube);
 
-	sphere = new Model(m_pD3DDevice, m_pImmediateContext);
-	sphere->LoadObjModel("assets/Sphere.obj");
+	cubeDesc.filePath = "assets/Sphere.obj";
+	//cubeDesc.targetTexture = 2;
+	cubeDesc.material = m_materialManager->getMaterial(Gold);
+	sphere = new Model(cubeDesc);
+	//sphere->LoadObjModel("assets/Sphere.obj");
 	//sphere->AddTexture("assets/texture.bmp");
-	sphere->setMaterial(m_materialManager->getMaterial(Gold));
-	//sphere->toggleUnlit(true);
-	m_models.push_back(sphere);
-
-	pointySphere = new TestModel(m_pD3DDevice, m_pImmediateContext, m_lightManger);
-	pointySphere->LoadObjModel("assets/Sphere.obj");
-	pointySphere->AddTexture("assets/texture.bmp");
-	pointySphere->setMaterial(m_materialManager->getMaterial(test));
-	pointySphere->setXPos(15.0f);
+	//sphere->setMaterial(m_materialManager->getMaterial(Gold));
+	sphere->toggleUnlit(true);
+	//m_models.push_back(sphere);
+	cubeDesc.targetTexture = 0;
+	cubeDesc.material = m_materialManager->getMaterial(WhitePlastic);
+	pointySphere = new Model(cubeDesc);
+	//pointySphere->LoadObjModel("assets/Sphere.obj");
+	//pointySphere->AddTexture("assets/texture.bmp");
+	//pointySphere->setMaterial(m_materialManager->getMaterial(test));
+	//pointySphere->setPosition({ 15.0f, 0.0f, 0.0f, 0.0f });
+	//pointySphere->setXPos(15.0f);
 	//pointySphere->toggleUnlit(true);
 	//m_models.push_back(pointySphere);
 	//2.93333411
-
-	//SceneNode* cubeNode = new SceneNode(m_rootNode, cube);
-	//cubeNode->setPosition(XMVectorSet(-4.0f, 0.0f, 5.0f, 0.0f));
+	//TODO work out where these are being deleted/make sure that they are
+	SceneNode* cubeNode = new SceneNode(m_rootNode, cube);
+	cubeNode->setPosition(XMVectorSet(-4.0f, 0.0f, 5.0f, 0.0f));
 	//cubeNode->setScale(XMVectorSet(0.5, 0.5, 0.5, 0.0));
-	//cubeNode->addBoundingSphereModel(sphere);
-	//SceneNode* cubeNode2 = new SceneNode(m_rootNode, pointySphere);
+	cubeNode->addBoundingSphereModel(sphere);
+	SceneNode* cubeNode2 = new SceneNode(m_rootNode, pointySphere);
 	//cubeNode2->setScale(XMVectorSet(1.5, 1.5, 1.5, 0.0));
-	//cubeNode2->setPosition(XMVectorSet(4.0f, 0.0f, 5.0f, 0.0f));
-	//cubeNode2->addBoundingSphereModel(sphere);
-	//m_rootNode->addNode(cubeNode);
-	//m_rootNode->addNode(cubeNode2);
-	//m_player = cubeNode2;
+	cubeNode2->setPosition(XMVectorSet(4.0f, 0.0f, 5.0f, 0.0f));
+	cubeNode2->addBoundingSphereModel(sphere);
+	m_rootNode->addNode(cubeNode);
+	m_rootNode->addNode(cubeNode2);
+	m_player = cubeNode2;
 
 	//lights/manager
 	
@@ -323,8 +327,6 @@ HRESULT Game::InitialiseGraphics()
 	newLight.type = DIRECTIONAL_LIGHT;
 
 	m_lightManger->addLight(newLight);
-
-	m_lightManger->setAmbientLight(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
 	
 	//camera
 	m_camera = &Camera::getInstance();
@@ -335,6 +337,10 @@ HRESULT Game::InitialiseGraphics()
 	second = 0.0f;
 
 	wireframeMode = false;
+
+	m_identity = XMMatrixIdentity();
+
+	//Shader s = m_shaderM
 
 	return S_OK;
 }
@@ -391,20 +397,20 @@ void Game::Update(float deltaTime)
 		wireframeMode = !wireframeMode;
 		if (wireframeMode)
 		{
-			for (Model* m : m_models)
-			{
-				m->toggleUnlit(wireframeMode);
-				m->setMaterial(m_materialManager->getMaterial(RedPlastic));
-			}
-			sphere->setMaterial(m_materialManager->getMaterial(YellowPlastic));
+			//for (Model* m : m_models)
+			//{
+			//	m->toggleUnlit(wireframeMode);
+			//	m->setMaterial(m_materialManager->getMaterial(RedPlastic));
+			//}
+			//sphere->setMaterial(m_materialManager->getMaterial(YellowPlastic));
 		}
 		else
 		{
-			for (Model* m : m_models)
-			{
-				m->toggleUnlit(wireframeMode);
-				m->setMaterial(m_materialManager->getMaterial(WhitePlastic));
-			}
+			//for (Model* m : m_models)
+			//{
+			//	m->toggleUnlit(wireframeMode);
+			//	m->setMaterial(m_materialManager->getMaterial(WhitePlastic));
+			//}
 		}
 	}
 }
@@ -423,7 +429,6 @@ void Game::Render()
 	XMMATRIX projection, view;
 	projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.0f), 640.0f / 480.0f, 0.01f, 100.0f);
 	view = m_camera->getMatrixView();
-	//XMVECTOR cameraPos = m_camera->getPosition().getXMVector();
 
 	//draw skybox
 	renderSkybox(view, projection);
@@ -431,37 +436,34 @@ void Game::Render()
 	//wireframe?
 	if (wireframeMode)
 	{
+		RENDER_DESC descWS;
+		ZeroMemory(&descWS, sizeof(descWS));
+		descWS.projection = &projection;
+		descWS.view = &view;
+		descWS.world = &m_identity;
+		descWS.targetShader = 0;
+		descWS.targetTexture = 0;
 		m_pImmediateContext->RSSetState(m_wireframeRS);
-		m_rootNode->drawBoundingSphere(XMMatrixIdentity(), view, projection);
+		m_rootNode->drawBoundingSphere(descWS);
 	}
 	else
 	{
 		m_pImmediateContext->RSSetState(m_defaultRS);
 	}
 
-	//loop through shaders
-
-	//set shaders
-	m_pImmediateContext->VSSetShader(m_shaders[0]->getVertexShader(), 0, 0);
-	m_pImmediateContext->PSSetShader(m_shaders[0]->getPixelShader(), 0, 0);
-
-	//set inputlayout
-	m_pImmediateContext->IASetInputLayout(m_shaders[0]->getInputLayout());
-
-	//loop objects
-	//draw object
+	RENDER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.projection = &projection;
+	desc.view = &view;
+	desc.world = &m_identity;
+	desc.targetShader = 0;
+	desc.targetTexture = 0;
+	desc.skyboxTexture = m_skybox->getTexture();
+	XMVECTOR c = m_camera->getPosition().getXMVector();
+	desc.camera = &c;
 
 	//render objects
-	m_rootNode->draw(XMMatrixIdentity(), view, projection);
-	RenderInfo data;
-	data.world = &XMMatrixIdentity();
-	data.view = &view;
-	data.projection = &projection;
-	data.skyboxTexture = m_skybox->getTexture();
-
-	cube->Draw(&data);
-	pointySphere->Draw(&data);
-	//render lights
+	m_rootNode->draw(desc);
 
 	// Display what has just been rendered
 	m_pSwapChain->Present(0, 0);

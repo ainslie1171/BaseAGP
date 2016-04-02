@@ -10,10 +10,8 @@
 #include "sceneNode.h"
 #include "maths.h"
 #include "skybox.h"
-//#include "reflectModel.h"
-#include "testModel.h"
-#include "shader.h"
-
+#include "shaderManager.h"
+#include "textureManager.h"
 
 class Game
 {
@@ -37,18 +35,19 @@ private:
 	ID3D11RasterizerState*		m_wireframeRS;
 	ID3D11RasterizerState*		m_skyboxRS;
 	Text2D*	m_2DText;
-	TestModel* cube;
+	Model* cube;
 	Model* sphere;
-	TestModel* pointySphere;
-	vector<Model*> m_models;
-	vector<Shader*> m_shaders;
+	Model* pointySphere;
 	Skybox* m_skybox;
+	XMMATRIX m_identity;
 
 	float second;
 	int frameCount;
 	bool wireframeMode;
 
 	//InitialiseGraphics
+	ShaderManager* m_shaderManager;
+	TextureManager* m_textureManager;
 	materialManager* m_materialManager;
 	LightManager* m_lightManger;
 	Camera* m_camera;

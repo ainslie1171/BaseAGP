@@ -73,6 +73,26 @@ bool planeIntersection(const Plane& plane, const Vector4& pointA, const Vector4&
 	return true;
 }
 
+bool planeRayIntersection(const Plane& plane, const Vector4& start, const Vector4& direction, Vector4& intersection)
+{
+	Vector4 end = start - direction;
+
+	int pointAcheck = planeEquation(plane, start);
+	int pointBcheck = planeEquation(plane, end);
+	if (pointAcheck == pointBcheck)
+		return false;
+
+	
+
+	float t = (-plane.data.w - dot(plane.data, start)) / dot(plane.data, direction);
+
+	intersection.x = start.x + (direction.x * t);
+	intersection.y = start.y + (direction.y * t);
+	intersection.z = start.z + (direction.z * t);
+
+	return true;
+}
+
 bool trianglePointIntersection(const Triangle& triangle, const Vector4& point)
 {
 	//cross AP and AB

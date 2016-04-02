@@ -4,13 +4,17 @@ using namespace std;
 
 LightManager::LightManager()
 {
-
+	m_ambientLight = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 LightManager::~LightManager()
 {
 	//TODO: fix light manager destructor
-	m_lights.clear();
+	while (!m_lights.empty())
+	{
+		delete m_lights.back();
+		m_lights.pop_back();
+	}
 }
 
 void LightManager::addLight(const Light& light)

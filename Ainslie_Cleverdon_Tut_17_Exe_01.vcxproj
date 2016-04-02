@@ -86,14 +86,13 @@
     <ClCompile Include="maths.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="objfilemodel.cpp" />
-    <ClCompile Include="reflectModel.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="SceneNode.cpp" />
-    <ClCompile Include="shader.cpp" />
+    <ClCompile Include="shaderManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="skybox.cpp" />
-    <ClCompile Include="testModel.cpp" />
     <ClCompile Include="text2D.cpp" />
+    <ClCompile Include="textureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="modelShader.hlsl">
@@ -126,14 +125,13 @@
     <ClInclude Include="maths.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="objfilemodel.h" />
-    <ClInclude Include="reflectModel.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="sceneNode.h" />
-    <ClInclude Include="shader.h" />
+    <ClInclude Include="shaderManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="skybox.h" />
-    <ClInclude Include="testModel.h" />
     <ClInclude Include="text2D.h" />
+    <ClInclude Include="textureManager.h" />
     <ClInclude Include="virtualKeyCodes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

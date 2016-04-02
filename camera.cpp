@@ -1,7 +1,7 @@
 #include "camera.h"
 #include "sceneNode.h"
 
-Camera::Camera()//float x, float y, float z, float cameraRotationX, float cameraRotationY)
+Camera::Camera()
 {
 	m_position = ZeroVector4;
 	m_rotation = ZeroVector4;
@@ -24,7 +24,6 @@ void Camera::RotateY(float degreesOfRotation)
 	}
 
 	m_lookAt.y = sin(m_rotation.y * (XM_PI / 180.0f));
-	//m_dzy = cos(m_rotation.y * (XM_PI / 180.0));
 }
 
 void Camera::Forward(float distance)
@@ -60,9 +59,6 @@ void Camera::move(const Vector4& destination)
 
 XMMATRIX Camera::getMatrixView()
 {
-	//m_position = XMVectorSet(m_x, m_y, m_z, 0.0);
-	//m_lookAt = XMVectorSet(m_x + m_dx, m_y + m_dy , m_z + m_dzx, 0.0);
-	//m_up = XMVectorSet(0.0, 1.0, 0.0, 0.0);
 	return XMMatrixLookAtLH(m_position.getXMVector(), (m_position + m_lookAt).getXMVector(), XMVectorSet(0.0, 1.0, 0.0, 0.0));
 }
 XMVECTOR Camera::getVectorView()
@@ -72,7 +68,5 @@ XMVECTOR Camera::getVectorView()
 
 void Camera::setPosition(Vector4 position)
 {
-	m_position.x = position.x;
-	m_position.y = position.y;
-	m_position.z = position.z;
+	m_position = position;
 }

@@ -4,6 +4,8 @@
 #include "model.h"
 #include "maths.h"
 
+class LightManager;
+
 class SceneNode
 {
 private:
@@ -13,6 +15,7 @@ private:
 	vector<SceneNode*> m_children;
 	XMVECTOR m_position, m_rotation, m_scale, m_worldCenter, m_worldScale;
 	XMMATRIX m_worldSpace;
+
 
 public:
 	SceneNode(SceneNode* rootNode=nullptr, Model* model = nullptr);
@@ -32,7 +35,7 @@ public:
 
 	void addNode(SceneNode* node);
 	bool removeNode(SceneNode* node);
-	void draw(const XMMATRIX& parent, const XMMATRIX& view, const XMMATRIX& projection);
+	void draw(RENDER_DESC& desc);
 	void updateCollisionTree(XMMATRIX* parentWorld, XMVECTOR parentScale);
 	XMVECTOR getWorldCenterPosition(){ return m_worldCenter; }
 	XMVECTOR getWorldScale(){ return m_worldScale; };
@@ -48,8 +51,10 @@ public:
 	void right(float distance);
 	void move(float distance, bool direction);
 
-	void drawBoundingSphere(const XMMATRIX& parent, const XMMATRIX& view, const XMMATRIX& projection);
+	void drawBoundingSphere(RENDER_DESC& desc);
 	void addBoundingSphereModel(Model* model);
+
+
 };
 
 #endif
