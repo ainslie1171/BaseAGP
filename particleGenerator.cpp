@@ -7,11 +7,32 @@ ParticleGenerator::ParticleGenerator(const PARTICLE_GENERATOR_DESC& desc)
 	m_pShaderManager = desc.shaderManager;
 	m_shaderID = desc.targetShader;
 	init();
+
+	for (UINT i = 0; i < 100; i++)
+	{
+		Particle* p = new Particle();
+		m_free.push_back(p);
+	}
+
+	m_particleSpawnRate = desc.particleSpawnRate;
+	m_untilParticle = desc.particleSpawnRate;
 }
 
 //13
 ParticleGenerator::~ParticleGenerator()
 {
+	while (!m_active.empty())
+	{
+		delete m_active.back();
+		m_active.pop_back();
+	}
+
+	while (!m_free.empty())
+	{
+		delete m_free.back();
+		m_free.pop_back();
+	}
+
 	if (m_pVertexBuffer) m_pVertexBuffer->Release();
 	if (m_pConstantBuffer) m_pConstantBuffer->Release();
 }
@@ -67,15 +88,45 @@ HRESULT ParticleGenerator::init()
 void ParticleGenerator::draw(RENDER_DESC& desc)
 {
 	if (m_shaderID != desc.targetShader) updateShader(desc);
+	float deltaTime = desc.deltaTime;
+	m_untilParticle -= deltaTime;
 
-	Particle test;
-	test.colour = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
-	test.gravity = 1.0f;
-	test.position = XMFLOAT3(0.0f, 0.0f, 3.0f);
-	test.velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
-	drawOne(desc, test);
+	if (m_untilParticle <= 0 && !m_free.empty())
+	{
+		Particle* p = m_free.front();
+		//set p values
+		p->colour = XMFLOAT4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
+		p->gravity = 1.0f;
+		p->velocity = XMFLOAT3(randomNegOneToPosOne(), randomNegOneToPosOne(), randomNegOneToPosOne());
+		p->position = XMFLOAT3(0.0f, 0.0f, 3.0f);
+		m_active.push_back(p);
+		m_free.pop_front();
+		m_untilParticle = m_particleSpawnRate;
+	}
 
+	list<Particle*>::iterator it = m_active.begin();
+	list<list<Particle*>::iterator> dirty;
+	while (it != m_active.end())
+	{
+		Particle* p = (*it);
+		p->velocity.y -= (p->gravity * deltaTime);
+		p->position.x += (p->velocity.x * deltaTime);
+		p->position.y += (p->velocity.y * deltaTime);
+		p->position.z += (p->velocity.z * deltaTime);
+		drawOne(desc, *p);
+		if (p->position.y <= -4.0f)
+		{
+			dirty.push_back(it);
+		}
+		it++;
+	}
+
+	for (list<Particle*>::iterator dead : dirty)
+	{
+		m_free.push_back(*dead);
+		m_active.erase(dead);
+	}
 }
 
 void ParticleGenerator::drawOne(RENDER_DESC& desc, const Particle& p)
@@ -117,4 +168,16 @@ void ParticleGenerator::updateShader(RENDER_DESC& desc)
 		m_pImmediateContext->IASetInputLayout(s.InputLayout);
 	}
 	desc.targetShader = m_shaderID;
+}
+
+float ParticleGenerator::randomZeroToOne()
+{
+	float output = float(rand() % 101);
+	return output / 100.0f;
+}
+
+float ParticleGenerator::randomNegOneToPosOne()
+{
+	float output = float(rand() % 201 - 100);
+	return output / 100.0f;
 }

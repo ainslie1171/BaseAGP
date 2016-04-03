@@ -66,7 +66,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	StartingTime.QuadPart = 0;
 	Frequency.QuadPart = 1;
-	
+	srand(int(time(NULL)));
 
 	// Main message loop
 	MSG msg = { 0 };
@@ -84,7 +84,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// do something
 			input->ReadInputStates();
 			game->Update(DeltaTime.QuadPart/1000000.0f);
-			game->Render();
+			game->Render(DeltaTime.QuadPart / 1000000.0f);
 			UpdateDeltaTime();
 		}
 	}

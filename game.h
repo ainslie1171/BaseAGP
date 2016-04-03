@@ -69,7 +69,7 @@ public:
 	void setInput(Input* input);
 	HWND getHWND() { return m_hWnd; };
 
-	void Render();
+	void Render(float deltaTime);
 	void Update(float deltaTime);
 };
 

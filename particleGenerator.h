@@ -2,6 +2,8 @@
 #define _PARTICLE_GENERATOR_H_
 
 #include "model.h"
+#include <list>
+
 
 struct Particle
 {
@@ -17,6 +19,7 @@ struct PARTICLE_GENERATOR_DESC
 	ID3D11DeviceContext* context;
 	ShaderManager* shaderManager;
 	UINT targetShader;
+	float particleSpawnRate;
 };
 
 class ParticleGenerator
@@ -28,10 +31,16 @@ private:
 	ID3D11Buffer* m_pConstantBuffer;
 	ShaderManager* m_pShaderManager;
 	UINT m_shaderID;
+	float m_untilParticle;
+	float m_particleSpawnRate;
+	std::list<Particle*> m_free;
+	std::list<Particle*> m_active;
 
 	HRESULT init();
 	void updateShader(RENDER_DESC& desc);
 	void drawOne(RENDER_DESC& desc, const Particle& p);
+	float randomZeroToOne();
+	float randomNegOneToPosOne();
 public:
 	ParticleGenerator(const PARTICLE_GENERATOR_DESC& desc);
 	~ParticleGenerator();

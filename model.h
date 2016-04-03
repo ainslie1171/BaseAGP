@@ -21,6 +21,7 @@ struct RENDER_DESC
 	ID3D11ShaderResourceView* skyboxTexture;
 	unsigned int targetShader;
 	unsigned int targetTexture;
+	float deltaTime;
 };
 
 struct MODEL_DESC

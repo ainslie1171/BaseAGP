@@ -270,6 +270,7 @@ HRESULT Game::InitialiseGraphics()
 	pgDesc.device = m_pD3DDevice;
 	pgDesc.shaderManager = m_shaderManager;
 	pgDesc.targetShader = 3;
+	pgDesc.particleSpawnRate = 1.5f;
 	m_particleGenerator = new ParticleGenerator(pgDesc);
 
 	//objects
@@ -425,7 +426,7 @@ void Game::Update(float deltaTime)
 	}
 }
 
-void Game::Render()
+void Game::Render(float deltaTime)
 {
 	// Clear the back buffer - choose a colour you like
 	float rgba_clear_colour[4] = { 0.1f, 0.1f, 0.8f, 0.01f };
@@ -461,6 +462,7 @@ void Game::Render()
 		m_pImmediateContext->RSSetState(m_defaultRS);
 	}
 
+
 	RENDER_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
 	desc.projection = &projection;
@@ -471,7 +473,7 @@ void Game::Render()
 	desc.skyboxTexture = m_skybox->getTexture();
 	XMVECTOR c = m_camera->getPosition().getXMVector();
 	desc.camera = &c;
-
+	desc.deltaTime = deltaTime;
 	//render objects
 	m_rootNode->draw(desc);
 
