@@ -248,8 +248,10 @@ HRESULT Game::InitialiseGraphics()
 
 	m_shaderManager = new ShaderManager(m_pD3DDevice);
 
-	m_shaderManager->add("modelShader.hlsl");
-	m_shaderManager->add("testShader.hlsl");
+	m_shaderManager->add("modelShader.hlsl", 3);
+	m_shaderManager->add("testShader.hlsl", 3);
+	m_shaderManager->add("particleShader.hlsl", 1);
+
 	m_lightManger = new LightManager();
 
 	//Materials
@@ -261,6 +263,14 @@ HRESULT Game::InitialiseGraphics()
 	sbDesc.context = m_pImmediateContext;
 	sbDesc.textureFilepath = "assets/skybox02.dds";
 	m_skybox = new Skybox(sbDesc);
+
+	//particle generator
+	PARTICLE_GENERATOR_DESC pgDesc;
+	pgDesc.context = m_pImmediateContext;
+	pgDesc.device = m_pD3DDevice;
+	pgDesc.shaderManager = m_shaderManager;
+	pgDesc.targetShader = 3;
+	m_particleGenerator = new ParticleGenerator(pgDesc);
 
 	//objects
 	m_rootNode = new SceneNode();
@@ -464,6 +474,9 @@ void Game::Render()
 
 	//render objects
 	m_rootNode->draw(desc);
+
+	desc.world = &m_identity;
+	m_particleGenerator->draw(desc);
 
 	// Display what has just been rendered
 	m_pSwapChain->Present(0, 0);

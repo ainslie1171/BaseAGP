@@ -15,10 +15,10 @@ ShaderManager::~ShaderManager()
 	}
 }
 
-void ShaderManager::add(char* filePath)
+void ShaderManager::add(char* filePath, int inputElementSize)
 {
 	Shader* s = new Shader();
-	init(s, filePath);
+	init(s, filePath, inputElementSize);
 	
 	if (m_shaders.size() < 1)
 	{
@@ -32,7 +32,7 @@ void ShaderManager::add(char* filePath)
 	m_shaders.push_back(s);
 }
 
-HRESULT ShaderManager::init(Shader* shader, char* filePath)
+HRESULT ShaderManager::init(Shader* shader, char* filePath, int inputElementSize)
 {
 	HRESULT hr = S_OK;
 
@@ -40,7 +40,7 @@ HRESULT ShaderManager::init(Shader* shader, char* filePath)
 	ID3DBlob *VS,
 		*PS,
 		*error;
-	hr = D3DX11CompileFromFile(filePath, 0, 0, "ModelVS", "vs_4_0", 0, 0, 0, &VS, &error, 0);
+	hr = D3DX11CompileFromFile(filePath, 0, 0, "VShader", "vs_4_0", 0, 0, 0, &VS, &error, 0);
 
 	//check for shader compilation error
 	if (error != 0)
@@ -53,7 +53,7 @@ HRESULT ShaderManager::init(Shader* shader, char* filePath)
 		};
 	}
 
-	hr = D3DX11CompileFromFile(filePath, 0, 0, "ModelPS", "ps_4_0", 0, 0, 0, &PS, &error, 0);
+	hr = D3DX11CompileFromFile(filePath, 0, 0, "PShader", "ps_4_0", 0, 0, 0, &PS, &error, 0);
 
 	//check for shader compilation error
 	if (error != 0)
@@ -83,14 +83,26 @@ HRESULT ShaderManager::init(Shader* shader, char* filePath)
 
 	//Create and set the input layout object
 	//TODO might have to change this at a later date
-	D3D11_INPUT_ELEMENT_DESC iedesc[] =
+	if (inputElementSize == 1)
 	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
+		D3D11_INPUT_ELEMENT_DESC iedesc[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+		hr = m_pDevice->CreateInputLayout(iedesc, _ARRAYSIZE(iedesc), VS->GetBufferPointer(), VS->GetBufferSize(), &shader->InputLayout);
+	}
 
-	hr = m_pDevice->CreateInputLayout(iedesc, ARRAYSIZE(iedesc), VS->GetBufferPointer(), VS->GetBufferSize(), &shader->InputLayout);
+	if (inputElementSize == 3)
+	{
+		D3D11_INPUT_ELEMENT_DESC iedesc[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+		hr = m_pDevice->CreateInputLayout(iedesc, _ARRAYSIZE(iedesc), VS->GetBufferPointer(), VS->GetBufferSize(), &shader->InputLayout);
+	}
+
 
 	if (FAILED(hr))
 	{

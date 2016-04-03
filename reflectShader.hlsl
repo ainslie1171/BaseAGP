@@ -54,7 +54,7 @@ struct VOut
     float3 texcoord2 : TEXCOORD2;
 };
 
-VOut ModelVS(float4 position : POSITION, float2 texcoord : TEXCOORD, float3 normal : NORMAL)
+VOut VShader(float4 position : POSITION, float2 texcoord : TEXCOORD, float3 normal : NORMAL)
 {
 	VOut output;
 	output.position = mul(WVPMatrix, position);
@@ -124,7 +124,7 @@ VOut ModelVS(float4 position : POSITION, float2 texcoord : TEXCOORD, float3 norm
 	return output;
 }
 
-float4 ModelPS(float4 position : SV_POSITION, float4 colour : COLOR, float2 texcoord : TEXCOORD, float3 texcoord2 : TEXCOORD2) : SV_TARGET
+float4 PShader(float4 position : SV_POSITION, float4 colour : COLOR, float2 texcoord : TEXCOORD, float3 texcoord2 : TEXCOORD2) : SV_TARGET
 {
 	//calculate texture against material
 	float4 textureColour = { 1, 1, 1, 1 };

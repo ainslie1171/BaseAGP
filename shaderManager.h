@@ -19,17 +19,22 @@ struct Shader
 	unsigned int ID;
 };
 
+struct InputElementWrapper
+{
+	D3D11_INPUT_ELEMENT_DESC iedesc;
+};
+
 class ShaderManager
 {
 private:
 	ID3D11Device* m_pDevice;
 	std::vector<Shader*> m_shaders;
 
-	HRESULT init(Shader* shader, char* filePath);
+	HRESULT init(Shader* shader, char* filePath, int inputElementSize);
 public:
 	ShaderManager(ID3D11Device* device);
 	~ShaderManager();
-	void add(char* filePath);
+	void add(char* filePath, int inputElementSize);
 	void remove(Shader* shader);
 	void remove(unsigned int ID);
 	bool getShader(unsigned int ID, Shader* returnedShader);

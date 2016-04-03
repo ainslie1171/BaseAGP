@@ -86,6 +86,9 @@
     <ClCompile Include="maths.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="objfilemodel.cpp" />
+    <ClCompile Include="particleGenerator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="SceneNode.cpp" />
     <ClCompile Include="shaderManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -96,6 +99,9 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="modelShader.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="particleShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="reflectShader.hlsl">
@@ -125,6 +131,9 @@
     <ClInclude Include="maths.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="objfilemodel.h" />
+    <ClInclude Include="particleGenerator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="sceneNode.h" />
     <ClInclude Include="shaderManager.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>

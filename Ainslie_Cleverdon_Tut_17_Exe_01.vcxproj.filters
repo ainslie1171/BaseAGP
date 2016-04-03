@@ -60,6 +60,9 @@
     <ClCompile Include="textureManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="particleGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="text2D_shaders.hlsl">
@@ -75,6 +78,9 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="testShader.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="particleShader.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
@@ -125,6 +131,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="textureManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particleGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

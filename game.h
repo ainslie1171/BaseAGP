@@ -12,6 +12,7 @@
 #include "skybox.h"
 #include "shaderManager.h"
 #include "textureManager.h"
+#include "particleGenerator.h"
 
 class Game
 {
@@ -40,6 +41,7 @@ private:
 	Model* pointySphere;
 	Skybox* m_skybox;
 	XMMATRIX m_identity;
+	ParticleGenerator* m_particleGenerator;
 
 	float second;
 	int frameCount;
