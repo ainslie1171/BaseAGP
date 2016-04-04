@@ -88,6 +88,8 @@ HRESULT ParticleGenerator::init()
 void ParticleGenerator::draw(RENDER_DESC& desc)
 {
 	if (m_shaderID != desc.targetShader) updateShader(desc);
+	
+	
 	float deltaTime = desc.deltaTime;
 	m_untilParticle -= deltaTime;
 
@@ -99,7 +101,7 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 		p->colour = XMFLOAT4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
 		p->gravity = 1.0f;
 		p->velocity = XMFLOAT3(randomNegOneToPosOne(), randomNegOneToPosOne(), randomNegOneToPosOne());
-		p->position = XMFLOAT3(0.0f, 0.0f, 3.0f);
+		p->position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		m_active.push_back(p);
 		m_free.pop_front();
 		m_untilParticle = m_particleSpawnRate;
@@ -127,13 +129,29 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 		m_free.push_back(*dead);
 		m_active.erase(dead);
 	}
+	/*
+	Particle Test;
+	Test.colour = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	Test.position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	drawOne(desc, Test);
+	*/
 }
 
 void ParticleGenerator::drawOne(RENDER_DESC& desc, const Particle& p)
 {
 	XMMATRIX world = XMMatrixIdentity();
+	XMVECTOR d;
+	d.x = p.position.x - desc.camera->x;
+	d.y = p.position.y - desc.camera->y;
+	d.z = p.position.z - desc.camera->z;
+
+	float m_yAngle = atan2(d.x, d.z) + XM_PI;
+	float dyz = d.z / cos(m_yAngle);
+	float m_xAnlge = atan2(-d.y, dyz) + XM_PI;
+
 	world = XMMatrixScaling(0.3f, 0.3f, 0.3f);
-	world *= XMMatrixRotationY(XM_PI);
+	world *= XMMatrixRotationX(m_xAnlge);
+	world *= XMMatrixRotationY(m_yAngle);
 	world *= XMMatrixTranslation(p.position.x, p.position.y, p.position.z);
 	world *= (*desc.world);
 

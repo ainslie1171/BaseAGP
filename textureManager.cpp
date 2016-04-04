@@ -34,7 +34,12 @@ void TextureManager::add(char* filePath)
 HRESULT TextureManager::init(Texture* texture, char* filePath)
 {
 	HRESULT hr = S_OK;
-	D3DX11CreateShaderResourceViewFromFile(m_pDevice, filePath, NULL, NULL, &texture->m_pTexture, NULL);
+	hr = D3DX11CreateShaderResourceViewFromFile(m_pDevice, filePath, NULL, NULL, &texture->m_pTexture, NULL);
+
+	if (FAILED(hr))
+		return hr;
+
+
 	//Craete the Sampler State
 	D3D11_SAMPLER_DESC sampler_desc;
 	ZeroMemory(&sampler_desc, sizeof(sampler_desc));

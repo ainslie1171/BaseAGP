@@ -245,6 +245,7 @@ HRESULT Game::InitialiseGraphics()
 	m_textureManager = new TextureManager(m_pD3DDevice);
 	m_textureManager->add("assets/texture.bmp");
 	m_textureManager->add("assets/yellow.bmp");
+	//m_textureManager->add("assets.spherelight.png");
 
 	m_shaderManager = new ShaderManager(m_pD3DDevice);
 
@@ -316,15 +317,15 @@ HRESULT Game::InitialiseGraphics()
 	//m_models.push_back(pointySphere);
 	//2.93333411
 	//TODO work out where these are being deleted/make sure that they are
-	SceneNode* cubeNode = new SceneNode(m_rootNode, cube);
-	cubeNode->setPosition(XMVectorSet(-4.0f, 0.0f, 5.0f, 0.0f));
+	//SceneNode* cubeNode = new SceneNode(m_rootNode, cube);
+	//cubeNode->setPosition(XMVectorSet(-4.0f, 0.0f, 5.0f, 0.0f));
 	//cubeNode->setScale(XMVectorSet(0.5, 0.5, 0.5, 0.0));
-	cubeNode->addBoundingSphereModel(sphere);
+	//cubeNode->addBoundingSphereModel(sphere);
 	SceneNode* cubeNode2 = new SceneNode(m_rootNode, pointySphere);
-	//cubeNode2->setScale(XMVectorSet(1.5, 1.5, 1.5, 0.0));
-	cubeNode2->setPosition(XMVectorSet(4.0f, 0.0f, 5.0f, 0.0f));
+	cubeNode2->setScale(XMVectorSet(0.1f, 0.1f, 0.1f, 0.0));
+	cubeNode2->setPosition(XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f));
 	cubeNode2->addBoundingSphereModel(sphere);
-	m_rootNode->addNode(cubeNode);
+	//m_rootNode->addNode(cubeNode);
 	m_rootNode->addNode(cubeNode2);
 	m_player = cubeNode2;
 
@@ -367,6 +368,7 @@ void Game::Update(float deltaTime)
 	second += deltaTime;
 	if ( second >= 1.0f)
 	{
+		XMVECTOR c = m_camera->getVectorView();
 		second = 0;
 		char outputString[50];
 		sprintf_s(outputString, "FPS: %d\n\n", frameCount);
@@ -474,8 +476,10 @@ void Game::Render(float deltaTime)
 	XMVECTOR c = m_camera->getPosition().getXMVector();
 	desc.camera = &c;
 	desc.deltaTime = deltaTime;
+	XMVECTOR vv = m_camera->getVectorView();
+	desc.viewVector = &vv;
 	//render objects
-	m_rootNode->draw(desc);
+	//m_rootNode->draw(desc);
 
 	desc.world = &m_identity;
 	m_particleGenerator->draw(desc);

@@ -15,6 +15,7 @@ struct ID3D11Buffer;
 struct RENDER_DESC
 {
 	XMVECTOR* camera;
+	XMVECTOR* viewVector;
 	XMMATRIX* world;
 	XMMATRIX* view;
 	XMMATRIX* projection;
