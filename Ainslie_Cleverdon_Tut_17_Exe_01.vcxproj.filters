@@ -16,6 +16,15 @@
     <Filter Include="Shader Files">
       <UniqueIdentifier>{b7d4cb28-4adf-45f0-b1b4-fe68ce2fdc5e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Physics">
+      <UniqueIdentifier>{9d85dc6b-ed42-49aa-9475-9e43900c8640}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Physics\Header Files">
+      <UniqueIdentifier>{8137bae6-f88a-4971-a239-ec26640367fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Physics\SourceFiles">
+      <UniqueIdentifier>{37652ef9-a5aa-41fe-b5cc-27e4e4636356}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -62,6 +71,12 @@
     </ClCompile>
     <ClCompile Include="particleGenerator.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vector.cpp">
+      <Filter>Physics\SourceFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="physics.cpp">
+      <Filter>Physics\SourceFiles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -135,6 +150,12 @@
     </ClInclude>
     <ClInclude Include="particleGenerator.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>Physics\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics.h">
+      <Filter>Physics\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

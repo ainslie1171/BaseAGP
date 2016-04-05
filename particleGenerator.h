@@ -3,14 +3,19 @@
 
 #include "model.h"
 #include <list>
+#include "physics.h"
 
 
 struct Particle
 {
-	float gravity;
-	XMFLOAT3 position;
-	XMFLOAT3 velocity;
-	XMFLOAT4 colour;
+	Vector3 position;
+	Vector3 linVelocity;
+	Vector4 colour;
+	float mass;
+	float radius;
+	float angle;
+	float angVelocity;
+
 };
 
 struct PARTICLE_GENERATOR_DESC
@@ -41,6 +46,8 @@ private:
 	void drawOne(RENDER_DESC& desc, const Particle& p);
 	float randomZeroToOne();
 	float randomNegOneToPosOne();
+	void move(Particle& particle, const Vector4& destination);
+	bool checkCollision(const Particle& particle, const Vector4& destination);
 public:
 	ParticleGenerator(const PARTICLE_GENERATOR_DESC& desc);
 	~ParticleGenerator();

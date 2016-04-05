@@ -89,6 +89,7 @@
     <ClCompile Include="particleGenerator.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="physics.cpp" />
     <ClCompile Include="SceneNode.cpp" />
     <ClCompile Include="shaderManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -96,6 +97,7 @@
     <ClCompile Include="skybox.cpp" />
     <ClCompile Include="text2D.cpp" />
     <ClCompile Include="textureManager.cpp" />
+    <ClCompile Include="vector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="modelShader.hlsl">
@@ -134,6 +136,7 @@
     <ClInclude Include="particleGenerator.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="physics.h" />
     <ClInclude Include="sceneNode.h" />
     <ClInclude Include="shaderManager.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -141,6 +144,7 @@
     <ClInclude Include="skybox.h" />
     <ClInclude Include="text2D.h" />
     <ClInclude Include="textureManager.h" />
+    <ClInclude Include="vector.h" />
     <ClInclude Include="virtualKeyCodes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -262,7 +262,7 @@ HRESULT Game::InitialiseGraphics()
 	ZeroMemory(&sbDesc, sizeof(sbDesc));
 	sbDesc.device = m_pD3DDevice;
 	sbDesc.context = m_pImmediateContext;
-	sbDesc.textureFilepath = "assets/skybox02.dds";
+	sbDesc.textureFilepath = "assets/Texture2.dds";
 	m_skybox = new Skybox(sbDesc);
 
 	//particle generator
@@ -271,7 +271,7 @@ HRESULT Game::InitialiseGraphics()
 	pgDesc.device = m_pD3DDevice;
 	pgDesc.shaderManager = m_shaderManager;
 	pgDesc.targetShader = 3;
-	pgDesc.particleSpawnRate = 1.5f;
+	pgDesc.particleSpawnRate = 1.0f;
 	m_particleGenerator = new ParticleGenerator(pgDesc);
 
 	//objects
@@ -368,7 +368,6 @@ void Game::Update(float deltaTime)
 	second += deltaTime;
 	if ( second >= 1.0f)
 	{
-		XMVECTOR c = m_camera->getVectorView();
 		second = 0;
 		char outputString[50];
 		sprintf_s(outputString, "FPS: %d\n\n", frameCount);
@@ -492,7 +491,8 @@ void Game::renderSkybox(const XMMATRIX& view, const XMMATRIX& projection)
 {
 	XMMATRIX worldMatrix = XMMatrixIdentity();
 	worldMatrix *= XMMatrixScaling(3.0f, 3.0f, 3.0f);
-	worldMatrix *= XMMatrixTranslationFromVector(m_camera->getPosition().getXMVector());
+	Vector4 cp = m_camera->getPosition();
+	worldMatrix *= XMMatrixTranslation(cp.x, (cp.y + 2.9f), cp.z);
 
 	m_pImmediateContext->RSSetState(m_skyboxRS);
 	m_pImmediateContext->OMSetDepthStencilState(m_skyboxDepthStencil, 0);
