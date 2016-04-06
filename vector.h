@@ -19,12 +19,15 @@ struct Vector3
 	Vector3 operator-(const Vector3 &rhs) const;
 	Vector3& operator-=(const Vector3 &rhs);
 	Vector3 operator*(const Vector3 &rhs);
+	Vector3 operator*(const Vector3 &rhs) const;
 	Vector3& operator*=(const Vector3 &rhs);
 	Vector3 operator/(const Vector3 &rhs);
 	Vector3 operator/(const Vector3 &rhs) const;
 	Vector3& operator/=(const Vector3 &rhs);
 	bool operator==(const Vector3 &rhs);
+	bool operator==(const Vector3 &rhs) const;
 	bool operator!=(const Vector3 &rhs);
+	bool operator!=(const Vector3 &rhs) const;
 	Vector3();
 	Vector3(float xIn, float yIn, float zIn);
 	Vector3(const XMVECTOR &rhs);
@@ -52,6 +55,7 @@ struct Vector4
 	Vector4(float xIn, float yIn, float zIn, float wIn);
 	Vector4(const XMVECTOR &rhs);
 	Vector4(const XMFLOAT3 &rhs);
+	Vector4(const XMFLOAT4 &rhs);
 	Vector4(const Vector3 &rhs);
 	bool operator!=(const Vector4 &rhs);
 	XMVECTOR getXMVector() const;

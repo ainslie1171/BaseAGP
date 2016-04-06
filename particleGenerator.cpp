@@ -10,7 +10,7 @@ ParticleGenerator::ParticleGenerator(const PARTICLE_GENERATOR_DESC& desc)
 
 	for (UINT i = 0; i < 100; i++)
 	{
-		Particle* p = new Particle();
+		p_Particle* p = new p_Particle();
 		m_free.push_back(p);
 	}
 
@@ -96,64 +96,70 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 
 	if (m_untilParticle <= 0 && !m_free.empty())
 	{
-		Particle* p = m_free.front();
+		p_Particle* p = m_free.front();
 		//set p values
 		p->colour = { randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f };
-		p->velocity = { randomNegOneToPosOne(), randomNegOneToPosOne(), randomNegOneToPosOne() };
-		p->position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		p->Momentum = { 0.0f, 0.0f, 0.0f };
+		p->Position = { 0.0f, 0.0f, 0.0f };
 		p->scale = 0.3f;
-		p->mass = 0.3f;
+		p->Mass = 0.2f;
+		p->time = 0.0f;
+		applyImpulse(*p, { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() });
 		m_active.push_back(p);
 		m_free.pop_front();
 		m_untilParticle = m_particleSpawnRate;
 	}
 
-	list<Particle*>::iterator it = m_active.begin();
-	list<list<Particle*>::iterator> dirty;
+	list<p_Particle*>::iterator it = m_active.begin();
+	list<list<p_Particle*>::iterator> dirty;
 	while (it != m_active.end())
 	{
-		Particle* p = (*it);
-		Vector3 force = ApplyForce(*p, gravity);
-		Vector3 accel = CalcAcceleration(*p, force);
-		p->velocity += accel * deltaTime;
-		Vector3 Destination = p->position + (p->velocity * deltaTime);
+		p_Particle* p = (*it);
+		p->time += deltaTime;
+		applyForce(*p, gravity, deltaTime);
 
-		move(*p, Destination);
+		stepPosition(*p, deltaTime);
+
 		drawOne(desc, *p);
-		if (p->position.y <= -4.0f)
+		if (p->Position.y <= -4.0f)
 		{
+			char outputString[50];
+			sprintf_s(outputString, "Life: %f\n\n", p->time);
+			OutputDebugString(outputString);
 			dirty.push_back(it);
 		}
 		it++;
 	}
 
-	for (list<Particle*>::iterator dead : dirty)
+	for (list<p_Particle*>::iterator dead : dirty)
 	{
 		m_free.push_back(*dead);
 		m_active.erase(dead);
 	}
-	/*
-	Particle Test;
+	
+	p_Particle Test;
 	Test.colour = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
-	Test.position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	Test.Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	Test.scale = 0.1f;
 	drawOne(desc, Test);
-	*/
+	
+	
 }
 
-void ParticleGenerator::move(Particle& particle, const Vector4& destination)
+void ParticleGenerator::move(p_Particle& particle, const Vector4& destination)
 {
-	particle.position = XMFLOAT3(destination.x, destination.y, destination.z);
+	particle.Position = XMFLOAT3(destination.x, destination.y, destination.z);
 	if(checkCollision(particle, destination))
-		particle.position = XMFLOAT3(-destination.x, -destination.y, -destination.z);
+		particle.Position = XMFLOAT3(-destination.x, -destination.y, -destination.z);
 }
 
-bool ParticleGenerator::checkCollision(const Particle& particle, const Vector4& destination)
+bool ParticleGenerator::checkCollision(const p_Particle& particle, const Vector4& destination)
 {
-	for (Particle* p : m_active)
+	for (p_Particle* p : m_active)
 	{
 		if (p != &particle)
 		{
-			float distanceSq = distanceBetweenVectorsSqr(destination, p->position);
+			float distanceSq = distanceBetweenVectorsSqr(destination, p->Position);
 			float combRadiSq = (p->scale) + (particle.scale);
 			combRadiSq *= combRadiSq;
 			if (distanceSq < combRadiSq)
@@ -163,13 +169,13 @@ bool ParticleGenerator::checkCollision(const Particle& particle, const Vector4& 
 	return false;
 }
 
-void ParticleGenerator::drawOne(RENDER_DESC& desc, const Particle& p)
+void ParticleGenerator::drawOne(RENDER_DESC& desc, const p_Particle& p)
 {
 	XMMATRIX world = XMMatrixIdentity();
 	XMVECTOR d;
-	d.x = p.position.x - desc.camera->x;
-	d.y = p.position.y - desc.camera->y;
-	d.z = p.position.z - desc.camera->z;
+	d.x = p.Position.x - desc.camera->x;
+	d.y = p.Position.y - desc.camera->y;
+	d.z = p.Position.z - desc.camera->z;
 
 	float m_yAngle = atan2(d.x, d.z) + XM_PI;
 	float dyz = d.z / cos(m_yAngle);
@@ -178,7 +184,7 @@ void ParticleGenerator::drawOne(RENDER_DESC& desc, const Particle& p)
 	world = XMMatrixScaling(p.scale, p.scale, p.scale);
 	world *= XMMatrixRotationX(m_xAnlge);
 	world *= XMMatrixRotationY(m_yAngle);
-	world *= XMMatrixTranslation(p.position.x, p.position.y, p.position.z);
+	world *= XMMatrixTranslation(p.Position.x, p.Position.y, p.Position.z);
 	world *= (*desc.world);
 
 	//create constatnt buffer

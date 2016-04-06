@@ -4,6 +4,20 @@
 #include "maths.h"
 struct Particle;
 
+struct p_Particle
+{
+	Vector3 Momentum;
+	Vector3 Position;
+	float Mass;
+	Vector4 colour;
+	float scale;
+	float time;
+};
+
+void applyImpulse(p_Particle& p, const Vector3& J);
+void stepPosition(p_Particle& p, float deltaTime);
+void applyForce(p_Particle& p, const Vector3& A, float deltaTime);
+
 Vector3 ApplyForce(const Particle& p, const Vector3& f);
 Vector3 CalcAcceleration(const Particle& p, const Vector3& f);
 

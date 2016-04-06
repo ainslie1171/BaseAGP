@@ -1,5 +1,9 @@
 #include "vector.h"
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////               Vector3                /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 Vector3 Vector3::operator + (const Vector3 &rhs)
 {
 	Vector3 result = *this;
@@ -44,6 +48,13 @@ Vector3 Vector3::operator*(const Vector3 &rhs)
 	return result;
 }
 
+Vector3 Vector3::operator*(const Vector3 &rhs) const
+{
+	Vector3 result = *this;
+	result *= rhs;
+	return result;
+}
+
 Vector3& Vector3::operator*=(const Vector3 &rhs)
 {
 	this->x *= rhs.x;
@@ -75,6 +86,11 @@ Vector3& Vector3::operator/=(const Vector3 &rhs)
 }
 
 bool Vector3::operator==(const Vector3 &rhs)
+{
+	return (this->x == rhs.x&&this->y == rhs.y&&this->z == rhs.z);
+}
+
+bool Vector3::operator==(const Vector3 &rhs) const
 {
 	return (this->x == rhs.x&&this->y == rhs.y&&this->z == rhs.z);
 }
@@ -122,6 +138,11 @@ bool Vector3::operator!=(const Vector3 &rhs)
 	return !(*this == rhs);
 }
 
+bool Vector3::operator!=(const Vector3 &rhs) const
+{
+	return !(*this == rhs);
+}
+
 XMVECTOR Vector3::getXMVector() const
 {
 	XMVECTOR v;
@@ -131,6 +152,10 @@ XMVECTOR Vector3::getXMVector() const
 	v.w = 1.0f;
 	return v;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////               Vector4                /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Vector4 Vector4::operator + (const Vector4 &rhs)
 {
@@ -234,6 +259,14 @@ Vector4::Vector4(const XMVECTOR &rhs)
 	y = rhs.y;
 	z = rhs.z;
 	w = rhs.w;
+}
+
+Vector4::Vector4(const XMFLOAT4 &rhs)
+{
+	x = rhs.x;
+	y = rhs.y;
+	z = rhs.z;
+	w = 0;
 }
 
 Vector4::Vector4(const XMFLOAT3 &rhs)

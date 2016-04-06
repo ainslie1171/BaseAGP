@@ -38,16 +38,16 @@ private:
 	UINT m_shaderID;
 	float m_untilParticle;
 	float m_particleSpawnRate;
-	std::list<Particle*> m_free;
-	std::list<Particle*> m_active;
+	std::list<p_Particle*> m_free;
+	std::list<p_Particle*> m_active;
 
 	HRESULT init();
 	void updateShader(RENDER_DESC& desc);
-	void drawOne(RENDER_DESC& desc, const Particle& p);
+	void drawOne(RENDER_DESC& desc, const p_Particle& p);
 	float randomZeroToOne();
 	float randomNegOneToPosOne();
-	void move(Particle& particle, const Vector4& destination);
-	bool checkCollision(const Particle& particle, const Vector4& destination);
+	void move(p_Particle& particle, const Vector4& destination);
+	bool checkCollision(const p_Particle& particle, const Vector4& destination);
 public:
 	ParticleGenerator(const PARTICLE_GENERATOR_DESC& desc);
 	~ParticleGenerator();
