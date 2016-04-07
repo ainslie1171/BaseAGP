@@ -98,13 +98,12 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 	{
 		p_Particle* p = m_free.front();
 		//set p values
-		p->colour = { randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f };
-		p->Momentum = { 0.0f, 0.0f, 0.0f };
-		p->Position = { 0.0f, 0.0f, 0.0f };
+		p->P = { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() };
+		p->X = { 0.0f, 0.0f, 0.0f };
 		p->scale = 0.3f;
-		p->Mass = 0.2f;
+		p->M = 0.2f;
 		p->time = 0.0f;
-		applyImpulse(*p, { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() });
+		//applyImpulse(*p, { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() });
 		m_active.push_back(p);
 		m_free.pop_front();
 		m_untilParticle = m_particleSpawnRate;
@@ -115,13 +114,9 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 	while (it != m_active.end())
 	{
 		p_Particle* p = (*it);
-		p->time += deltaTime;
-		applyForce(*p, gravity, deltaTime);
-
-		stepPosition(*p, deltaTime);
-
+		p->update(deltaTime);
 		drawOne(desc, *p);
-		if (p->Position.y <= -4.0f)
+		if (p->X.y <= -4.0f)
 		{
 			char outputString[50];
 			sprintf_s(outputString, "Life: %f\n\n", p->time);
@@ -138,8 +133,7 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 	}
 	
 	p_Particle Test;
-	Test.colour = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
-	Test.Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	Test.X = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	Test.scale = 0.1f;
 	drawOne(desc, Test);
 	
@@ -148,9 +142,9 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 
 void ParticleGenerator::move(p_Particle& particle, const Vector4& destination)
 {
-	particle.Position = XMFLOAT3(destination.x, destination.y, destination.z);
+	particle.X = XMFLOAT3(destination.x, destination.y, destination.z);
 	if(checkCollision(particle, destination))
-		particle.Position = XMFLOAT3(-destination.x, -destination.y, -destination.z);
+		particle.X = XMFLOAT3(-destination.x, -destination.y, -destination.z);
 }
 
 bool ParticleGenerator::checkCollision(const p_Particle& particle, const Vector4& destination)
@@ -159,7 +153,7 @@ bool ParticleGenerator::checkCollision(const p_Particle& particle, const Vector4
 	{
 		if (p != &particle)
 		{
-			float distanceSq = distanceBetweenVectorsSqr(destination, p->Position);
+			float distanceSq = distanceBetweenVectorsSqr(destination, p->X);
 			float combRadiSq = (p->scale) + (particle.scale);
 			combRadiSq *= combRadiSq;
 			if (distanceSq < combRadiSq)
@@ -173,9 +167,9 @@ void ParticleGenerator::drawOne(RENDER_DESC& desc, const p_Particle& p)
 {
 	XMMATRIX world = XMMatrixIdentity();
 	XMVECTOR d;
-	d.x = p.Position.x - desc.camera->x;
-	d.y = p.Position.y - desc.camera->y;
-	d.z = p.Position.z - desc.camera->z;
+	d.x = p.X.x - desc.camera->x;
+	d.y = p.X.y - desc.camera->y;
+	d.z = p.X.z - desc.camera->z;
 
 	float m_yAngle = atan2(d.x, d.z) + XM_PI;
 	float dyz = d.z / cos(m_yAngle);
@@ -184,7 +178,7 @@ void ParticleGenerator::drawOne(RENDER_DESC& desc, const p_Particle& p)
 	world = XMMatrixScaling(p.scale, p.scale, p.scale);
 	world *= XMMatrixRotationX(m_xAnlge);
 	world *= XMMatrixRotationY(m_yAngle);
-	world *= XMMatrixTranslation(p.Position.x, p.Position.y, p.Position.z);
+	world *= XMMatrixTranslation(p.X.x, p.X.y, p.X.z);
 	world *= (*desc.world);
 
 	//create constatnt buffer
@@ -192,7 +186,7 @@ void ParticleGenerator::drawOne(RENDER_DESC& desc, const p_Particle& p)
 	ZeroMemory(&particle_cb_values, sizeof(PARTICLE_CONSTANT_BUFFER));
 	//add world view projection
 	particle_cb_values.WorldViewProjection = (world)*(*desc.view)*(*desc.projection);
-	particle_cb_values.colour = p.colour.getXMFloat4();
+	particle_cb_values.colour = XMFLOAT4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
 	//update 
 	m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, 0, &particle_cb_values, 0, 0);
 	//Vertex shader c buffer

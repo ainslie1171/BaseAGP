@@ -6,12 +6,16 @@ struct Particle;
 
 struct p_Particle
 {
-	Vector3 Momentum;
-	Vector3 Position;
-	float Mass;
-	Vector4 colour;
+	Vector3 P;
+	Vector3 X;
+	float M;
 	float scale;
 	float time;
+	
+
+	void update(float dt);
+	void applyForce(const Vector3& A, float deltaTime);
+	void stepPosition(float dt);
 };
 
 void applyImpulse(p_Particle& p, const Vector3& J);
