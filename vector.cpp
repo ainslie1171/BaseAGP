@@ -126,6 +126,7 @@ Vector3::Vector3(const XMFLOAT3 &rhs)
 	y = rhs.y;
 	z = rhs.z;
 }
+
 Vector3::Vector3(const float rhs)
 {
 	x = rhs;
@@ -196,6 +197,13 @@ Vector4& Vector4::operator-=(const Vector4 &rhs)
 }
 
 Vector4 Vector4::operator*(const Vector4 &rhs)
+{
+	Vector4 result = *this;
+	result *= rhs;
+	return result;
+}
+
+Vector4 Vector4::operator*(const Vector4 &rhs) const
 {
 	Vector4 result = *this;
 	result *= rhs;
@@ -283,6 +291,13 @@ Vector4::Vector4(const Vector3 &rhs)
 	y = rhs.y;
 	z = rhs.z;
 	w = 0.0f;
+}
+
+Vector4::Vector4(const float rhs)
+{
+	x = rhs;
+	y = rhs;
+	z = rhs;
 }
 
 bool Vector4::operator!=(const Vector4 &rhs)

@@ -46,6 +46,7 @@ struct Vector4
 	Vector4 operator-(const Vector4 &rhs) const;
 	Vector4& operator-=(const Vector4 &rhs);
 	Vector4 operator*(const Vector4 &rhs);
+	Vector4 operator*(const Vector4 &rhs) const;
 	Vector4& operator*=(const Vector4 &rhs);
 	Vector4 operator/(const Vector4 &rhs);
 	Vector4& operator/=(const Vector4 &rhs);
@@ -57,6 +58,7 @@ struct Vector4
 	Vector4(const XMFLOAT3 &rhs);
 	Vector4(const XMFLOAT4 &rhs);
 	Vector4(const Vector3 &rhs);
+	Vector4(const float rhs);
 	bool operator!=(const Vector4 &rhs);
 	XMVECTOR getXMVector() const;
 	XMFLOAT4 getXMFloat4() const;

@@ -128,3 +128,8 @@ float distanceBetweenVectorsSqr(const Vector4& vector1, const Vector4& vector2)
 	Vector4 differenc = vector1 - vector2;
 	return (differenc.x*differenc.x) + (differenc.y * differenc.y) + (differenc.z*differenc.z);
 }
+
+Vector4 vectorProjection(const Vector4& vector1, const Vector4& vector2)
+{
+	return vector2 * Vector4(dot(vector1, vector2) / dot(vector2, vector2));
+}
