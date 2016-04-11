@@ -52,17 +52,89 @@ bool p_Particle::simpleCollisionCheck(const p_Particle& p)
 {
 	float distanceSq = distanceBetweenVectorsSqr(X, p.X);
 
-	float combRadiSq = pow((2 * scale), 2.0f);
+	float combRadiSq = pow((scale + p.scale), 2.0f);
 
 	return (distanceSq <= combRadiSq);
 }
+
+void p_Particle::checkBoundries()
+{
+	Vector3 bot, left, right, front, back;
+	bot = { 0.0f, -5.0f, 0.0f };
+	left = { -5.0f, 0.0f, 0.0f };
+	right = { 5.0f, 0.0f, 0.0f };
+	front = { 0.0f, 0.0f, -5.0f };
+	back = { 0.0f, 0.0f, 5.0f };
+
+
+
+	if (simpleBoundryCheck(bot))
+		boundryCollisionResponse(bot);
+
+	if (simpleBoundryCheck(left))
+		boundryCollisionResponse(left);
+
+	if (simpleBoundryCheck(right))
+		boundryCollisionResponse(right);
+
+	if (simpleBoundryCheck(front))
+		boundryCollisionResponse(front);
+
+	if (simpleBoundryCheck(back))
+		boundryCollisionResponse(back);
+}
+
+bool p_Particle::simpleBoundryCheck(const Vector3& b)
+{
+	if (b.x < 0)
+	{
+		return (X.x < b.x);
+	}
+	else if (b.x > 0)
+	{
+		return (X.x > b.x);
+	}
+
+	if (b.y < 0)
+	{
+		return (X.y < b.y);
+	}
+	else if (b.y > 0)
+	{
+		return (X.y > b.y);
+	}
+
+	if (b.z < 0)
+	{
+		return (X.z < b.z);
+	}
+	else if (b.z > 0)
+	{
+		return (X.z > b.z);
+	}
+
+	return false;
+}
+
+
+void p_Particle::boundryCollisionResponse(const Vector3& b)
+{
+	Vector3 dif = b - X;
+	if (b.x != 0)
+		P.x = dif.x * M;
+	if (b.y != 0)
+		P.y = dif.y * M;
+	if (b.z != 0)
+		P.z = dif.z * M;
+}
+
 
 void p_Particle::collisionResponse(p_Particle& p)
 {
 	float x1, x2, eps;
 	Vector3 v1, v2, v1x, v2x, v1y, v2y, dif(X - p.X);
 
-	eps = 0.1f;
+	eps = 2.0f;
 	dif = dif.normalise();
 
 	v1 = P / M;
@@ -78,6 +150,6 @@ void p_Particle::collisionResponse(p_Particle& p)
 	v2y = v2 - v2x;
 
 
-	P += Vector3(v1x*(M - p.M) / (M + p.M) + v2x*(eps * p.M) / (M + p.M) + v1y) * M;
-	p.P += Vector3(v1x*(eps * M) / (M + p.M) + v2x*(p.M - M) / (M + p.M) + v2y) * p.M;
+	P = Vector3(v1x*(M - p.M) / (M + p.M) + v2x*(eps * p.M) / (M + p.M) + v1y) * M;
+	p.P = Vector3(v1x*(eps * M) / (M + p.M) + v2x*(p.M - M) / (M + p.M) + v2y) * p.M;
 }

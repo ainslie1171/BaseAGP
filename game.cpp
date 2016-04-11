@@ -273,6 +273,8 @@ HRESULT Game::InitialiseGraphics()
 	pgDesc.targetShader = 3;
 	pgDesc.particleSpawnRate = 1.0f;
 	m_particleGenerator = new ParticleGenerator(pgDesc);
+	m_particleGenerator->create();
+
 
 	//objects
 	m_rootNode = new SceneNode();
@@ -404,6 +406,11 @@ void Game::Update(float deltaTime)
 	else if (m_input->isKeyPressed(DIK_RIGHT))
 		m_player->right(speed);
 
+	if (m_input->getMouseData().leftClick && !m_input->getPrevMouseData().leftClick)
+	{
+		m_particleGenerator->spawnParticle();
+	}
+
 	if (m_input->isKeyPressed(DIK_INSERT))
 	{
 		wireframeMode = !wireframeMode;
@@ -481,7 +488,7 @@ void Game::Render(float deltaTime)
 	//m_rootNode->draw(desc);
 
 	desc.world = &m_identity;
-	m_particleGenerator->draw(desc);
+	m_particleGenerator->drawP(desc);
 
 	// Display what has just been rendered
 	m_pSwapChain->Present(0, 0);

@@ -20,6 +20,9 @@ struct p_Particle
 	void stepPosition(float dt);
 	bool simpleCollisionCheck(const p_Particle& p);
 	void collisionResponse(p_Particle& p);
+	void checkBoundries();
+	bool simpleBoundryCheck(const Vector3& b);
+	void boundryCollisionResponse(const Vector3& b);
 };
 
 void applyImpulse(p_Particle& p, const Vector3& J);

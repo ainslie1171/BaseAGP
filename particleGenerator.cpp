@@ -1,4 +1,5 @@
 #include "particleGenerator.h"
+#include <cmath>
 
 ParticleGenerator::ParticleGenerator(const PARTICLE_GENERATOR_DESC& desc)
 {
@@ -8,7 +9,7 @@ ParticleGenerator::ParticleGenerator(const PARTICLE_GENERATOR_DESC& desc)
 	m_shaderID = desc.targetShader;
 	init();
 
-	for (UINT i = 0; i < 100; i++)
+	for (UINT i = 0; i < 1000; i++)
 	{
 		p_Particle* p = new p_Particle();
 		m_free.push_back(p);
@@ -227,6 +228,41 @@ void ParticleGenerator::drawOne(RENDER_DESC& desc, const p_Particle& p)
 	m_pImmediateContext->Draw(6, 0);
 }
 
+void ParticleGenerator::drawOne(RENDER_DESC& desc, const Sphere& s)
+{
+	XMMATRIX world = XMMatrixIdentity();
+	XMVECTOR d;
+	d.x = s.pos[0] - desc.camera->x;
+	d.y = s.pos[1] - desc.camera->y;
+	d.z = s.pos[2] - desc.camera->z;
+
+	float m_yAngle = atan2(d.x, d.z) + XM_PI;
+	float dyz = d.z / cos(m_yAngle);
+	float m_xAnlge = atan2(-d.y, dyz) + XM_PI;
+
+	world = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	world *= XMMatrixRotationX(m_xAnlge);
+	world *= XMMatrixRotationY(m_yAngle);
+	world *= XMMatrixTranslation(s.pos[0], s.pos[1], s.pos[2]);
+	world *= (*desc.world);
+
+	//create constatnt buffer
+	PARTICLE_CONSTANT_BUFFER particle_cb_values;
+	ZeroMemory(&particle_cb_values, sizeof(PARTICLE_CONSTANT_BUFFER));
+	//add world view projection
+	particle_cb_values.WorldViewProjection = (world)*(*desc.view)*(*desc.projection);
+	particle_cb_values.colour = XMFLOAT4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
+	//update 
+	m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, 0, &particle_cb_values, 0, 0);
+	//Vertex shader c buffer
+	m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pConstantBuffer);
+
+	UINT stride = sizeof(XMFLOAT3);
+	UINT offset = 0;
+	m_pImmediateContext->IASetVertexBuffers(0, 1, &m_pVertexBuffer, &stride, &offset);
+	m_pImmediateContext->Draw(6, 0);
+}
+
 void ParticleGenerator::updateShader(RENDER_DESC& desc)
 {
 	Shader s;
@@ -253,4 +289,136 @@ float ParticleGenerator::randomNegOneToPosOne()
 {
 	float output = float(rand() % 201 - 100);
 	return output / 100.0f;
+}
+
+
+
+
+
+
+void ParticleGenerator::create()
+{
+	p_Particle* p = m_free.front();
+	p->X = { 0.5f, 3.0f, -0.1f };
+	p->P = { 0.0f, 0.0f, 0.0f };
+	p->scale = 0.5f;
+	p->M = 0.5f;
+	p->time = 0.0f;
+	p->checkColl = false;
+	p->c = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+	p->applyForce({ 0.0f, -0.5f, 0.0f }, 1.0f / 2000.0f);
+	m_active.push_back(p);
+	m_free.pop_front();
+
+	p = m_free.front();
+	p->X = { 0.0f, -3.0f, 0.1f };
+	p->P = { 0.0f, 0.0f, 0.0f };
+	p->scale = 0.5f;
+	p->M = 1.0f;
+	p->time = 0.0f;
+	p->checkColl = false;
+	p->c = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+	p->applyForce({ 0.0f, 0.5f, 0.0f }, 1.0f / 2000.0f);
+	m_active.push_back(p);
+	m_free.pop_front();
+
+	p = m_free.front();
+	p->X = { 0.0f, 1.0f, 5.0f };
+	p->P = { 0.0f, 0.0f, 0.0f };
+	p->scale = 0.75f;
+	p->M = 2.0f;
+	p->time = 0.0f;
+	p->checkColl = false;
+	p->c = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+	p->applyForce({ 0.0f, 0.0f, 0.0f }, 1.0f / 2000.0f);
+	m_active.push_back(p);
+	m_free.pop_front();
+	
+
+}
+
+
+
+
+
+void ParticleGenerator::drawP(RENDER_DESC& desc)
+{
+
+	if (m_shaderID != desc.targetShader) updateShader(desc);
+	p_Particle Test;
+	Test.X = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	Test.scale = 0.1f;
+	Test.c = Vector4(1.0f, 1.0f, 0.0f, 1.0f);
+	drawOne(desc, Test);
+
+
+	float dt = 1.0f / 2000.0f;
+	float ddt = desc.deltaTime;
+	ddt = floor(ddt * 10000) / 10000;
+	if (ddt > 1 || ddt < dt)
+		ddt = dt;
+	char outputString[100];
+	sprintf_s(outputString, "Pos: [%.2f, %.2f, %.2f]\n\n", m_active.front()->X.x, m_active.front()->X.y, m_active.front()->X.z);
+	OutputDebugString(outputString);
+	update(ddt);
+	for (p_Particle* p : m_active)
+	{
+		drawOne(desc, *p);
+	}
+
+	
+}
+
+void ParticleGenerator::update(float dt)
+{
+	for (p_Particle* p : m_active)
+	{
+		p->applyForce(gravity, dt);
+	}
+
+	list<p_Particle*>::iterator j, i = m_active.begin();
+	p_Particle *p1, *p2;
+	while (i != m_active.end())
+	{
+		j = i;
+		j++;
+		p1 = (*i);
+		while (j != m_active.end())
+		{
+			p2 = (*j);
+			//check collision
+			if (p1->simpleCollisionCheck(*p2))
+			{
+				//resolve collision
+				p1->collisionResponse(*p2);
+			}
+			j++;
+		}
+		p1->checkBoundries();
+		i++;
+	}
+
+	for (p_Particle* p : m_active)
+	{
+		p->stepPosition(dt);
+	}
+}
+
+void ParticleGenerator::spawnParticle()
+{
+	if (!m_free.empty())
+	{
+		p_Particle* p = m_free.front();
+		//set p values
+		p->P = { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() };
+		p->X = { randomNegOneToPosOne() * 3.0f, randomZeroToOne() * 3.0f, randomNegOneToPosOne() * 3.0f };
+		p->scale = randomZeroToOne();
+		p->M = p->scale / 2.0f;
+		p->time = 0.0f;
+		p->checkColl = false;
+		p->c = Vector4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
+		m_active.push_back(p);
+		m_free.pop_front();
+		m_untilParticle = m_particleSpawnRate;
+	}
 }

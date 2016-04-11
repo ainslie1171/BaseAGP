@@ -5,7 +5,7 @@
 #include <list>
 #include <map>
 #include "physics.h"
-
+#include "AltVector.h"
 
 struct Particle
 {
@@ -28,6 +28,8 @@ struct PARTICLE_GENERATOR_DESC
 	float particleSpawnRate;
 };
 
+class Sphere;
+
 class ParticleGenerator
 {
 private:
@@ -46,6 +48,7 @@ private:
 	HRESULT init();
 	void updateShader(RENDER_DESC& desc);
 	void drawOne(RENDER_DESC& desc, const p_Particle& p);
+	void drawOne(RENDER_DESC& desc, const Sphere& s);
 	float randomZeroToOne();
 	float randomNegOneToPosOne();
 	void move(p_Particle& particle, const Vector4& destination);
@@ -54,6 +57,46 @@ public:
 	ParticleGenerator(const PARTICLE_GENERATOR_DESC& desc);
 	~ParticleGenerator();
 	void draw(RENDER_DESC& desc);
+	void create();
+	void drawS(RENDER_DESC& desc);
+	void drawP(RENDER_DESC& desc);
+	void update(float dt);
+	void doGravityP(float dt);
+	void spawnParticle();
 };
+
+
+
+
+
+
+class Sphere
+{
+public:
+	explicit Sphere(float r, float m) :
+		radius(r),
+		mass(m),
+		pos(),
+		vel(),
+		acc()
+	{
+		memset(color, 0, sizeof(color));
+	}
+
+	virtual ~Sphere()
+	{
+
+	}
+
+public:
+	float		radius;
+	float		mass;
+	KVector3	pos;
+	KVector3	vel;
+	KVector3	acc;
+	float		color[4];
+
+};
+
 
 #endif
