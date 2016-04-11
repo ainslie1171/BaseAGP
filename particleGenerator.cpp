@@ -98,11 +98,14 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 	{
 		p_Particle* p = m_free.front();
 		//set p values
-		p->P = { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() };
+		//p->P = { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() };
+		p->P = { 0.0f, 0.0f, 0.0f };
 		p->X = { 0.0f, 0.0f, 0.0f };
 		p->scale = 0.3f;
 		p->M = 0.2f;
 		p->time = 0.0f;
+		p->checkColl = false;
+		p->c = Vector4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
 		//applyImpulse(*p, { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() });
 		m_active.push_back(p);
 		m_free.pop_front();
@@ -111,20 +114,44 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 
 	list<p_Particle*>::iterator it = m_active.begin();
 	list<list<p_Particle*>::iterator> dirty;
+
+
 	while (it != m_active.end())
 	{
 		p_Particle* p = (*it);
+		
+		
+
+		if (p->checkColl)
+		{
+			for (p_Particle* cp : m_active)
+			{
+				if (p != cp)
+				{
+					if (p->simpleCollisionCheck(*cp))
+						p->collisionResponse(*cp);
+				}
+			}
+		}
 		p->update(deltaTime);
 		drawOne(desc, *p);
+
+
 		if (p->X.y <= -4.0f)
 		{
+			p->P = (0.0f, 0.0f, 0.0f);
+			p->X.y = -4.0f;
+			/*
 			char outputString[50];
 			sprintf_s(outputString, "Life: %f\n\n", p->time);
 			OutputDebugString(outputString);
 			dirty.push_back(it);
+			*/
 		}
+
 		it++;
 	}
+
 
 	for (list<p_Particle*>::iterator dead : dirty)
 	{
@@ -135,6 +162,7 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 	p_Particle Test;
 	Test.X = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	Test.scale = 0.1f;
+	Test.c = Vector4(1.0f, 1.0f, 0.0f, 1.0f);
 	drawOne(desc, Test);
 	
 	
@@ -143,20 +171,21 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 void ParticleGenerator::move(p_Particle& particle, const Vector4& destination)
 {
 	particle.X = XMFLOAT3(destination.x, destination.y, destination.z);
-	if(checkCollision(particle, destination))
+	if (simpleCollisionCheck(particle, destination))
 		particle.X = XMFLOAT3(-destination.x, -destination.y, -destination.z);
 }
 
-bool ParticleGenerator::checkCollision(const p_Particle& particle, const Vector4& destination)
+bool ParticleGenerator::simpleCollisionCheck(const p_Particle& particle, const Vector4& destination)
 {
 	for (p_Particle* p : m_active)
 	{
 		if (p != &particle)
 		{
 			float distanceSq = distanceBetweenVectorsSqr(destination, p->X);
-			float combRadiSq = (p->scale) + (particle.scale);
-			combRadiSq *= combRadiSq;
-			if (distanceSq < combRadiSq)
+
+			float combRadiSq = pow((2 * p->scale), 2.0f);
+
+			if (distanceSq <= combRadiSq)
 				return true;
 		}
 	}
@@ -186,7 +215,7 @@ void ParticleGenerator::drawOne(RENDER_DESC& desc, const p_Particle& p)
 	ZeroMemory(&particle_cb_values, sizeof(PARTICLE_CONSTANT_BUFFER));
 	//add world view projection
 	particle_cb_values.WorldViewProjection = (world)*(*desc.view)*(*desc.projection);
-	particle_cb_values.colour = XMFLOAT4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
+	particle_cb_values.colour = p.c.getXMFloat4();
 	//update 
 	m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, 0, &particle_cb_values, 0, 0);
 	//Vertex shader c buffer

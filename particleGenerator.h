@@ -3,6 +3,7 @@
 
 #include "model.h"
 #include <list>
+#include <map>
 #include "physics.h"
 
 
@@ -40,6 +41,7 @@ private:
 	float m_particleSpawnRate;
 	std::list<p_Particle*> m_free;
 	std::list<p_Particle*> m_active;
+	std::map<p_Particle*, p_Particle*> m_collisions;
 
 	HRESULT init();
 	void updateShader(RENDER_DESC& desc);
@@ -47,7 +49,7 @@ private:
 	float randomZeroToOne();
 	float randomNegOneToPosOne();
 	void move(p_Particle& particle, const Vector4& destination);
-	bool checkCollision(const p_Particle& particle, const Vector4& destination);
+	bool simpleCollisionCheck(const p_Particle& particle, const Vector4& destination);
 public:
 	ParticleGenerator(const PARTICLE_GENERATOR_DESC& desc);
 	~ParticleGenerator();

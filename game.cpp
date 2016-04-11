@@ -271,7 +271,7 @@ HRESULT Game::InitialiseGraphics()
 	pgDesc.device = m_pD3DDevice;
 	pgDesc.shaderManager = m_shaderManager;
 	pgDesc.targetShader = 3;
-	pgDesc.particleSpawnRate = 0.1f;
+	pgDesc.particleSpawnRate = 1.0f;
 	m_particleGenerator = new ParticleGenerator(pgDesc);
 
 	//objects

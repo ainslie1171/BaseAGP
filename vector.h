@@ -35,6 +35,7 @@ struct Vector3
 	Vector3(const XMFLOAT3 &rhs);
 	Vector3(const float rhs);
 	XMVECTOR getXMVector() const;
+	Vector3 normalise();
 };
 
 struct Vector4

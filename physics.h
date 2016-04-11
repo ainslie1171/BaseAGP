@@ -11,11 +11,15 @@ struct p_Particle
 	float M;
 	float scale;
 	float time;
-	
+	Vector4 c;
+
+	bool checkColl;
 
 	void update(float dt);
 	void applyForce(const Vector3& A, float deltaTime);
 	void stepPosition(float dt);
+	bool simpleCollisionCheck(const p_Particle& p);
+	void collisionResponse(p_Particle& p);
 };
 
 void applyImpulse(p_Particle& p, const Vector3& J);
