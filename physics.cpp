@@ -54,7 +54,16 @@ bool p_Particle::simpleCollisionCheck(const p_Particle& p)
 
 	float combRadiSq = pow((scale + p.scale), 2.0f);
 
-	return (distanceSq <= combRadiSq);
+	if (distanceSq <= combRadiSq)
+	{
+		c = { 1.0f, 0.0f, 0.0f, 1.0f };
+		return true;
+	}
+	else
+	{
+		c = { 0.0f, 0.5f, 0.5f, 1.0f };
+		return false;
+	}
 }
 
 void p_Particle::checkBoundries()
@@ -143,13 +152,25 @@ void p_Particle::collisionResponse(p_Particle& p)
 	v1y = v1 - x1;
 
 
-	dif *= -1;
+	//dif *= -1;
 	v2 = p.P / p.M;
 	x2 = dot(dif, v2);
 	v2x = dif * x2;
 	v2y = v2 - v2x;
 
-
+	/*
 	P = Vector3(v1x*(M - p.M) / (M + p.M) + v2x*(eps * p.M) / (M + p.M) + v1y) * M;
 	p.P = Vector3(v1x*(eps * M) / (M + p.M) + v2x*(p.M - M) / (M + p.M) + v2y) * p.M;
+	*/
+	
+	Vector3 impulse;
+	eps = 0.0f;
+	impulse = dif;
+	impulse *= -(1 + eps) * M * p.M;
+	impulse *= dot(dif, (v1 - v2));
+	impulse /= (M + p.M);
+
+	P += impulse;
+	p.P -= impulse;
+	
 }

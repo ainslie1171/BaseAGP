@@ -412,8 +412,8 @@ void ParticleGenerator::spawnParticle()
 		//set p values
 		p->P = { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() };
 		p->X = { randomNegOneToPosOne() * 3.0f, randomZeroToOne() * 3.0f, randomNegOneToPosOne() * 3.0f };
-		p->scale = randomZeroToOne();
-		p->M = p->scale / 2.0f;
+		p->scale = (1+randomZeroToOne())/2;
+		p->M = p->scale;
 		p->time = 0.0f;
 		p->checkColl = false;
 		p->c = Vector4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
