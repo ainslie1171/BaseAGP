@@ -78,12 +78,12 @@ bool p_Particle::betterCollisionCheck(const p_Particle& p, float dt)
 
 	if (distanceSq <= combRadiSq)
 	{
-		c = { 1.0f, 0.0f, 0.0f, 1.0f };
+		//c = { 1.0f, 0.0f, 0.0f, 1.0f };
 		return true;
 	}
 	else
 	{
-		c = { 0.0f, 0.5f, 0.5f, 1.0f };
+		//c = { 0.0f, 0.5f, 0.5f, 1.0f };
 		return false;
 	}
 }

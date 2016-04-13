@@ -384,18 +384,19 @@ void ParticleGenerator::update(float dt)
 		j = i;
 		j++;
 		p1 = (*i);
+		p1->checkBoundries();
 		while (j != m_active.end())
 		{
 			p2 = (*j);
 			//check collision
-			if (p1->simpleCollisionCheck(*p2))
+			if (p1->betterCollisionCheck(*p2, dt))
 			{
 				//resolve collision
 				p1->collisionResponse(*p2);
 			}
 			j++;
 		}
-		p1->checkBoundries();
+		
 		i++;
 	}
 
