@@ -6,9 +6,10 @@ struct Particle;
 
 struct p_Particle
 {
-	Vector3 P;
-	Vector3 X;
-	float M;
+	Vector3 Position;
+	Vector3 Velocity;
+	float Mass;
+	float InvMass;
 	float scale;
 	float time;
 	Vector4 c;

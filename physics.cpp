@@ -39,18 +39,18 @@ void p_Particle::update(float dt)
 
 void p_Particle::applyForce(const Vector3& A, float dt)
 {
-	P += A * M * dt;
+	Velocity += A * dt;
 }
 
 void p_Particle::stepPosition(float dt)
 {
-	X += P * dt / M;
+	Position += Velocity * dt;
 	checkColl = true;
 }
 
 bool p_Particle::simpleCollisionCheck(const p_Particle& p)
 {
-	float distanceSq = distanceBetweenVectorsSqr(X, p.X);
+	float distanceSq = distanceBetweenVectorsSqr(Position, p.Position);
 
 	float combRadiSq = pow((scale + p.scale), 2.0f);
 
@@ -97,29 +97,29 @@ bool p_Particle::simpleBoundryCheck(const Vector3& b)
 {
 	if (b.x < 0)
 	{
-		return (X.x < b.x);
+		return (Position.x < b.x);
 	}
 	else if (b.x > 0)
 	{
-		return (X.x > b.x);
+		return (Position.x > b.x);
 	}
 
 	if (b.y < 0)
 	{
-		return (X.y < b.y);
+		return (Position.y < b.y);
 	}
 	else if (b.y > 0)
 	{
-		return (X.y > b.y);
+		return (Position.y > b.y);
 	}
 
 	if (b.z < 0)
 	{
-		return (X.z < b.z);
+		return (Position.z < b.z);
 	}
 	else if (b.z > 0)
 	{
-		return (X.z > b.z);
+		return (Position.z > b.z);
 	}
 
 	return false;
@@ -128,49 +128,23 @@ bool p_Particle::simpleBoundryCheck(const Vector3& b)
 
 void p_Particle::boundryCollisionResponse(const Vector3& b)
 {
-	Vector3 dif = b - X;
+	Vector3 dif = b - Position;
 	if (b.x != 0)
-		P.x = dif.x * M;
+		Velocity.x = dif.x;
 	if (b.y != 0)
-		P.y = dif.y * M;
+		Velocity.y = dif.y;
 	if (b.z != 0)
-		P.z = dif.z * M;
+		Velocity.z = dif.z;
 }
 
 
 void p_Particle::collisionResponse(p_Particle& p)
 {
-	float x1, x2, eps;
-	Vector3 v1, v2, v1x, v2x, v1y, v2y, dif(X - p.X);
+	Vector3 N = (Position - p.Position);
+	N = N.normalise();
+	Vector3 Vr = (Velocity - p.Velocity);
+	Vector3 impulse =  N * dot(Vr, N);
 
-	eps = 2.0f;
-	dif = dif.normalise();
-
-	v1 = P / M;
-	x1 = dot(dif, v1);
-	v1x = dif * x1;
-	v1y = v1 - x1;
-
-
-	//dif *= -1;
-	v2 = p.P / p.M;
-	x2 = dot(dif, v2);
-	v2x = dif * x2;
-	v2y = v2 - v2x;
-
-	/*
-	P = Vector3(v1x*(M - p.M) / (M + p.M) + v2x*(eps * p.M) / (M + p.M) + v1y) * M;
-	p.P = Vector3(v1x*(eps * M) / (M + p.M) + v2x*(p.M - M) / (M + p.M) + v2y) * p.M;
-	*/
-	
-	Vector3 impulse;
-	eps = 0.0f;
-	impulse = dif;
-	impulse *= -(1 + eps) * M * p.M;
-	impulse *= dot(dif, (v1 - v2));
-	impulse /= (M + p.M);
-
-	P += impulse;
-	p.P -= impulse;
-	
+	Velocity -= impulse * InvMass;
+	p.Velocity += impulse * p.InvMass;
 }

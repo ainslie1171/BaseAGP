@@ -166,7 +166,7 @@ XMVECTOR Vector3::getXMVector() const
 
 Vector3 Vector3::normalise()
 {
-	return sqrtf(dot(*this, *this));
+	return (*this / sqrtf(dot(*this, *this)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

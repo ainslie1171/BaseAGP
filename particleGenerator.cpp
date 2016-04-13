@@ -100,10 +100,11 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 		p_Particle* p = m_free.front();
 		//set p values
 		//p->P = { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() };
-		p->P = { 0.0f, 0.0f, 0.0f };
-		p->X = { 0.0f, 0.0f, 0.0f };
+		p->Velocity = { 0.0f, 0.0f, 0.0f };
+		p->Position = { 0.0f, 0.0f, 0.0f };
 		p->scale = 0.3f;
-		p->M = 0.2f;
+		p->Mass = 0.2f;
+		p->InvMass = 1 / p->Mass;
 		p->time = 0.0f;
 		p->checkColl = false;
 		p->c = Vector4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
@@ -138,10 +139,10 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 		drawOne(desc, *p);
 
 
-		if (p->X.y <= -4.0f)
+		if (p->Position.y <= -4.0f)
 		{
-			p->P = (0.0f, 0.0f, 0.0f);
-			p->X.y = -4.0f;
+			p->Position = (0.0f, 0.0f, 0.0f);
+			p->Position.y = -4.0f;
 			/*
 			char outputString[50];
 			sprintf_s(outputString, "Life: %f\n\n", p->time);
@@ -161,7 +162,7 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 	}
 	
 	p_Particle Test;
-	Test.X = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	Test.Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	Test.scale = 0.1f;
 	Test.c = Vector4(1.0f, 1.0f, 0.0f, 1.0f);
 	drawOne(desc, Test);
@@ -171,9 +172,9 @@ void ParticleGenerator::draw(RENDER_DESC& desc)
 
 void ParticleGenerator::move(p_Particle& particle, const Vector4& destination)
 {
-	particle.X = XMFLOAT3(destination.x, destination.y, destination.z);
+	particle.Position = XMFLOAT3(destination.x, destination.y, destination.z);
 	if (simpleCollisionCheck(particle, destination))
-		particle.X = XMFLOAT3(-destination.x, -destination.y, -destination.z);
+		particle.Position = XMFLOAT3(-destination.x, -destination.y, -destination.z);
 }
 
 bool ParticleGenerator::simpleCollisionCheck(const p_Particle& particle, const Vector4& destination)
@@ -182,7 +183,7 @@ bool ParticleGenerator::simpleCollisionCheck(const p_Particle& particle, const V
 	{
 		if (p != &particle)
 		{
-			float distanceSq = distanceBetweenVectorsSqr(destination, p->X);
+			float distanceSq = distanceBetweenVectorsSqr(destination, p->Position);
 
 			float combRadiSq = pow((2 * p->scale), 2.0f);
 
@@ -197,9 +198,9 @@ void ParticleGenerator::drawOne(RENDER_DESC& desc, const p_Particle& p)
 {
 	XMMATRIX world = XMMatrixIdentity();
 	XMVECTOR d;
-	d.x = p.X.x - desc.camera->x;
-	d.y = p.X.y - desc.camera->y;
-	d.z = p.X.z - desc.camera->z;
+	d.x = p.Position.x - desc.camera->x;
+	d.y = p.Position.y - desc.camera->y;
+	d.z = p.Position.z - desc.camera->z;
 
 	float m_yAngle = atan2(d.x, d.z) + XM_PI;
 	float dyz = d.z / cos(m_yAngle);
@@ -208,7 +209,7 @@ void ParticleGenerator::drawOne(RENDER_DESC& desc, const p_Particle& p)
 	world = XMMatrixScaling(p.scale, p.scale, p.scale);
 	world *= XMMatrixRotationX(m_xAnlge);
 	world *= XMMatrixRotationY(m_yAngle);
-	world *= XMMatrixTranslation(p.X.x, p.X.y, p.X.z);
+	world *= XMMatrixTranslation(p.Position.x, p.Position.y, p.Position.z);
 	world *= (*desc.world);
 
 	//create constatnt buffer
@@ -299,38 +300,40 @@ float ParticleGenerator::randomNegOneToPosOne()
 void ParticleGenerator::create()
 {
 	p_Particle* p = m_free.front();
-	p->X = { 0.5f, 3.0f, -0.1f };
-	p->P = { 0.0f, 0.0f, 0.0f };
-	p->scale = 0.5f;
-	p->M = 0.5f;
+	p->Position = { 0.0f, 3.0f, 10.0f };
+	p->Velocity = { 0.5f, 0.0f, 0.0f };
+	p->scale = 1.0f;
+	p->Mass = 1.0f;
+	p->InvMass = 1 / p->Mass;
 	p->time = 0.0f;
 	p->checkColl = false;
 	p->c = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-	p->applyForce({ 0.0f, -0.5f, 0.0f }, 1.0f / 2000.0f);
 	m_active.push_back(p);
 	m_free.pop_front();
 
 	p = m_free.front();
-	p->X = { 0.0f, -3.0f, 0.1f };
-	p->P = { 0.0f, 0.0f, 0.0f };
-	p->scale = 0.5f;
-	p->M = 1.0f;
+	p->Position = { 3.0f, 3.0f, 10.0f };
+	p->Velocity = ZeroVector3;
+	p->scale = 1.0f;
+	p->Mass = 1.0f;
+	p->InvMass = 1 / p->Mass;
 	p->time = 0.0f;
 	p->checkColl = false;
 	p->c = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-	p->applyForce({ 0.0f, 0.5f, 0.0f }, 1.0f / 2000.0f);
+	//p->applyForce({ 0.0f, 0.5f, 0.0f }, 1.0f / 2000.0f);
 	m_active.push_back(p);
 	m_free.pop_front();
 
 	p = m_free.front();
-	p->X = { 0.0f, 1.0f, 5.0f };
-	p->P = { 0.0f, 0.0f, 0.0f };
-	p->scale = 0.75f;
-	p->M = 2.0f;
+	p->Position = { 1.5f, 0.0f, 10.0f };
+	p->Velocity = {0.0f, 1.0f, 0.0f};
+	p->scale = 1.0f;
+	p->Mass = 1.0f;
+	p->InvMass = 1 / p->Mass;
 	p->time = 0.0f;
 	p->checkColl = false;
 	p->c = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
-	p->applyForce({ 0.0f, 0.0f, 0.0f }, 1.0f / 2000.0f);
+	//p->applyForce({ 0.0f, 0.0f, 0.0f }, 1.0f / 2000.0f);
 	m_active.push_back(p);
 	m_free.pop_front();
 	
@@ -346,7 +349,7 @@ void ParticleGenerator::drawP(RENDER_DESC& desc)
 
 	if (m_shaderID != desc.targetShader) updateShader(desc);
 	p_Particle Test;
-	Test.X = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	Test.Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	Test.scale = 0.1f;
 	Test.c = Vector4(1.0f, 1.0f, 0.0f, 1.0f);
 	drawOne(desc, Test);
@@ -357,9 +360,7 @@ void ParticleGenerator::drawP(RENDER_DESC& desc)
 	ddt = floor(ddt * 10000) / 10000;
 	if (ddt > 1 || ddt < dt)
 		ddt = dt;
-	char outputString[100];
-	sprintf_s(outputString, "Pos: [%.2f, %.2f, %.2f]\n\n", m_active.front()->X.x, m_active.front()->X.y, m_active.front()->X.z);
-	OutputDebugString(outputString);
+
 	update(ddt);
 	for (p_Particle* p : m_active)
 	{
@@ -410,10 +411,11 @@ void ParticleGenerator::spawnParticle()
 	{
 		p_Particle* p = m_free.front();
 		//set p values
-		p->P = { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() };
-		p->X = { randomNegOneToPosOne() * 3.0f, randomZeroToOne() * 3.0f, randomNegOneToPosOne() * 3.0f };
-		p->scale = (1+randomZeroToOne())/2;
-		p->M = p->scale;
+		p->Velocity = { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() };
+		p->Position = { randomNegOneToPosOne() * 3.0f, randomZeroToOne() * 3.0f, randomNegOneToPosOne() * 3.0f };
+		p->scale = 1.0f;
+		p->Mass = p->scale;
+		p->InvMass = 1 / p->Mass;
 		p->time = 0.0f;
 		p->checkColl = false;
 		p->c = Vector4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
