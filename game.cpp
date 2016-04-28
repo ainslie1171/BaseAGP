@@ -82,7 +82,7 @@ Game::Game(InputManager* input, ID3D11Device* device, ID3D11DeviceContext* conte
 	//sphere->LoadObjModel("assets/Sphere.obj");
 	//sphere->AddTexture("assets/texture.bmp");
 	//sphere->setMaterial(m_materialManager->getMaterial(Gold));
-	sphere->toggleUnlit(true);
+	//sphere->toggleUnlit(true);
 	//m_models.push_back(sphere);
 	cubeDesc.targetTexture = 0;
 	cubeDesc.material = m_materialManager->getMaterial(WhitePlastic);
@@ -218,6 +218,7 @@ void Game::Update(float deltaTime)
 }
 
 void Game::Render(float deltaTime)
+
 {
 	XMMATRIX projection, view;
 	projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.0f), 640.0f / 480.0f, 0.01f, 100.0f);

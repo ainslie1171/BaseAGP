@@ -40,18 +40,23 @@ struct Shader
 		//create the constant buffer
 		hr = pDevice->CreateBuffer(&constant_buffer_desc, NULL, &constantBuffer);
 		if (FAILED(hr))
-			return;
+		{
+			OutputDebugString("Failed to create shader's constant buffer");
+		}
 	}
-	void updateResources(ID3D11DeviceContext* context, cBUFFER* cb, ID3D11ShaderResourceView* skybox)
+	void updateResources(ID3D11DeviceContext* context, const void* cb, ID3D11ShaderResourceView* skybox)
 	{
 		//update 
-		context->UpdateSubresource(constantBuffer, 0, 0, &cb, 0, 0);
+		context->UpdateSubresource(constantBuffer, 0, 0, cb, 0, 0);
 
 		//Vertex shader c buffer
 		context->VSSetConstantBuffers(0, 1, &constantBuffer);
 		context->PSSetConstantBuffers(0, 1, &constantBuffer);
+		if (skybox)
+		{
 
-		context->PSSetShaderResources(1, 1, &skybox);
+			context->PSSetShaderResources(1, 1, &skybox);
+		}
 	}
 };
 

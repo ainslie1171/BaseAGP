@@ -89,3 +89,13 @@ bool TextureManager::getTexture(unsigned int ID, Texture* textureOut)
 	}
 	return false;
 }
+
+Texture* TextureManager::getTexture(UINT ID)
+{
+	for (Texture* t : m_textures)
+	{
+		if (t->ID == ID)
+			return t;
+	}
+	return nullptr;
+}

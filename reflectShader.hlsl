@@ -1,4 +1,3 @@
-
 TextureCube texture0 : register(t0);
 Texture2D texture1 : register(t1);
 SamplerState sampler0;

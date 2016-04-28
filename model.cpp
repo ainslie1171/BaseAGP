@@ -58,6 +58,7 @@ void Model::Draw(RENDER_DESC& desc)
 	//create constatnt buffer
 	REFLECT_CONSTANT_BUFFER model_cb_values;
 	ZeroMemory(&model_cb_values, sizeof(REFLECT_CONSTANT_BUFFER));
+
 	//add world view projection
 	model_cb_values.WorldViewProjection = (*desc.world)*(*desc.view)*(*desc.projection);
 	model_cb_values.WorldMatrix = *desc.world;
@@ -75,6 +76,10 @@ void Model::Draw(RENDER_DESC& desc)
 	{
 		m_pMaterial->useTexture = (desc.targetTexture > 0 ? 1 : 0);
 		model_cb_values.material = *m_pMaterial;
+		if (!m_pMaterial->useTexture)
+		{
+			OutputDebugString("no texture in use\n");
+		}
 	}
 
 	m_pShaderManager->getShader(m_shaderID)->updateResources(m_pImmediateContext, &model_cb_values, desc.skyboxTexture);
@@ -130,16 +135,16 @@ float Model::GetBoundingSphereRadiusSqr()
 
 void Model::updateShader(RENDER_DESC& desc)
 {
-	Shader s;
-	if (!m_pShaderManager->getShader(m_shaderID, &s))
+	Shader *s = m_pShaderManager->getShader(m_shaderID);
+	if (!s)
 	{
 		if (m_shaderID != 0) OutputDebugString("Failed to retrieve shader\n");
 	}
 	else
 	{
-		m_pImmediateContext->VSSetShader(s.VShader, 0, 0);
-		m_pImmediateContext->PSSetShader(s.PShader, 0, 0);
-		m_pImmediateContext->IASetInputLayout(s.InputLayout);
+		m_pImmediateContext->VSSetShader(s->VShader, 0, 0);
+		m_pImmediateContext->PSSetShader(s->PShader, 0, 0);
+		m_pImmediateContext->IASetInputLayout(s->InputLayout);
 	}
 	desc.targetShader = m_shaderID;
 }
@@ -149,7 +154,16 @@ void Model::updateTexture(RENDER_DESC& desc)
 	Texture t;
 	if (!m_pTextureManager->getTexture(m_textureID, &t))
 	{
-		if (m_textureID != 0) OutputDebugString("Failed to retrieve texture");
+		if (m_textureID != 0)
+		{
+			OutputDebugString("Failed to retrieve texture");
+		}
+		else
+		{
+			Texture* t1 = m_pTextureManager->getTexture(1);
+			m_pImmediateContext->PSSetSamplers(0, 1, &t1->m_pSampler);
+			m_pImmediateContext->PSSetShaderResources(0, 1, nullptr);
+		}
 	}
 	else
 	{

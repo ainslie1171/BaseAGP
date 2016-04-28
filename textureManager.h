@@ -28,7 +28,8 @@ public:
 	void add(char* filePath);
 	void remove(Texture* texture);
 	void remove(unsigned int ID);
-	bool getTexture(unsigned int ID, Texture* textureOut);
+	bool getTexture(unsigned int ID, Texture* textureOut); 
+	Texture* getTexture(UINT ID);
 };
 
 #endif
