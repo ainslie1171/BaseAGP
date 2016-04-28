@@ -64,8 +64,6 @@ void Model::Draw(RENDER_DESC& desc)
 	model_cb_values.cameraPosition = *desc.camera;
 	model_cb_values.WorldViewMatrix = (*desc.world) * (*desc.view);
 
-	
-
 	//render lights
 	model_cb_values.ambient_light_colour = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -78,16 +76,9 @@ void Model::Draw(RENDER_DESC& desc)
 		m_pMaterial->useTexture = (desc.targetTexture > 0 ? 1 : 0);
 		model_cb_values.material = *m_pMaterial;
 	}
-	//update 
-	m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, 0, &model_cb_values, 0, 0);
 
-
-
-	//Vertex shader c buffer
-	m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pConstantBuffer);
-	m_pImmediateContext->PSSetConstantBuffers(0, 1, &m_pConstantBuffer);
+	m_pShaderManager->getShader(m_shaderID)->updateResources(m_pImmediateContext, &model_cb_values, desc.skyboxTexture);
 	
-	m_pImmediateContext->PSSetShaderResources(1, 1, &desc.skyboxTexture);
 
 	//draw
 	m_pObject->Draw();

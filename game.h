@@ -62,7 +62,7 @@ private:
 	void renderSkybox(const XMMATRIX& view, const XMMATRIX& projection);
 
 public:
-	Game(HINSTANCE hInstance, InputManager* input, ID3D11Device* device, ID3D11DeviceContext* context);
+	Game(InputManager* input, ID3D11Device* device, ID3D11DeviceContext* context);
 	~Game();
 	HRESULT InitialiseWindow(WNDPROC WndProc, int nCmdShow);
 	HRESULT InitialiseD3D();

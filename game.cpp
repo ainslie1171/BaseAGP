@@ -1,31 +1,40 @@
 #include "game.h"
 #include "DX11Framework.h"
 
-Game::Game(HINSTANCE hInstance, InputManager* input, ID3D11Device* device, ID3D11DeviceContext* context)
+Game::Game(InputManager* input, ID3D11Device* device, ID3D11DeviceContext* context)
 {
-	m_hInst = hInstance;
+	//Input
 	m_input = input;
-	//HRESULT hr = S_OK;
-
-	//Shader* s = new Shader(m_pD3DDevice, "modelShader.hlsl");
-	//m_shaders.push_back(s);
-
+	
+	//Texture Manager
 	m_textureManager = new TextureManager(device);
 	m_textureManager->add("assets/texture.bmp");
 	m_textureManager->add("assets/yellow.bmp");
-	//m_textureManager->add("assets.spherelight.png");
 
+	//Shader Manager
 	m_shaderManager = new ShaderManager(device);
-
 	m_shaderManager->add("modelShader.hlsl", 3);
+	m_shaderManager->getShader(1)->setCBuffer(device, sizeof(MODEL_CONSTANT_BUFFER));
 	m_shaderManager->add("testShader.hlsl", 3);
+	m_shaderManager->getShader(2)->setCBuffer(device, sizeof(REFLECT_CONSTANT_BUFFER));
 	m_shaderManager->add("particleShader.hlsl", 1);
+	m_shaderManager->getShader(3)->setCBuffer(device, sizeof(PARTICLE_CONSTANT_BUFFER));
+	/*
+	MODEL_CONSTANT_BUFFER cb_values;
 
+
+
+	shader->cBuffer = cb_values;
+	
+	*/
+
+	//Light Manager
 	m_lightManger = new LightManager();
 
 	//Materials
 	m_materialManager = new materialManager();
 
+	//Skybox
 	SKYBOX_DESC sbDesc;
 	ZeroMemory(&sbDesc, sizeof(sbDesc));
 	sbDesc.device = device;

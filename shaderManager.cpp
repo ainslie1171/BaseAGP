@@ -109,6 +109,8 @@ HRESULT ShaderManager::init(Shader* shader, char* filePath, int inputElementSize
 		return hr;
 	}
 
+	
+
 	return S_OK;
 }
 
@@ -127,6 +129,7 @@ void ShaderManager::remove(Shader* shader)
 {
 	std::vector<Shader*>::iterator it;
 	it = std::find(m_shaders.begin(), m_shaders.end(), shader);
+	delete shader;
 	m_shaders.erase(it);
 }
 
@@ -141,4 +144,18 @@ bool ShaderManager::getShader(unsigned int ID, Shader* returnedShader)
 		}
 	}
 	return false;
+}
+
+/*
+Be careful with this as it's not a 'safe' way of doing things.
+if you are unsure of getting 
+*/
+Shader* ShaderManager::getShader(UINT ID)
+{
+	for (Shader* s : m_shaders)
+	{
+		if (s->ID == ID)
+			return s;
+	}
+	return nullptr;
 }

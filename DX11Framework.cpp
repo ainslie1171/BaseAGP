@@ -339,7 +339,7 @@ int DX11Framework::Initialise(HINSTANCE hInstance, int nCmdShow)
 	m_pInputManager = new InputManager(m_hInst, m_hWnd);
 	m_pMenu = new MainMenu(m_pD3DDevice, m_pImmediateContext, m_pInputManager);
 	m_pOptions = new OptionsMenu(m_pD3DDevice, m_pImmediateContext, m_pInputManager);
-	m_pGame = new Game(m_hInst, m_pInputManager, m_pD3DDevice, m_pImmediateContext);
+	m_pGame = new Game(m_pInputManager, m_pD3DDevice, m_pImmediateContext);
 	
 
 	return 1;
