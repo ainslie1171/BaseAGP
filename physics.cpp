@@ -54,16 +54,7 @@ bool p_Particle::simpleCollisionCheck(const p_Particle& p)
 
 	float combRadiSq = pow((scale + p.scale), 2.0f);
 
-	if (distanceSq <= combRadiSq)
-	{
-		c = { 1.0f, 0.0f, 0.0f, 1.0f };
-		return true;
-	}
-	else
-	{
-		c = { 0.0f, 0.5f, 0.5f, 1.0f };
-		return false;
-	}
+	return (distanceSq <= combRadiSq);
 }
 
 bool p_Particle::betterCollisionCheck(const p_Particle& p, float dt)

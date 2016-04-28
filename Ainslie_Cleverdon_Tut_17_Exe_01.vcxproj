@@ -79,14 +79,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="DX11Framework.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="inputManager.cpp" />
     <ClCompile Include="lightManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mainMenu.cpp" />
     <ClCompile Include="materialManager.cpp" />
     <ClCompile Include="maths.cpp" />
+    <ClCompile Include="menu.cpp" />
+    <ClCompile Include="menuElement.cpp" />
     <ClCompile Include="model.cpp" />
+    <ClCompile Include="object2D.cpp" />
     <ClCompile Include="objfilemodel.cpp" />
+    <ClCompile Include="optionsMenu.cpp" />
     <ClCompile Include="particleGenerator.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -96,7 +103,11 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="skybox.cpp" />
+    <ClCompile Include="sprite.cpp" />
     <ClCompile Include="text2D.cpp" />
+    <ClCompile Include="text2D_OLD.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="textureManager.cpp" />
     <ClCompile Include="vector.cpp" />
   </ItemGroup>
@@ -124,16 +135,25 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="a_Template_h_file.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="constantBuffer0.h" />
     <ClInclude Include="directInputKeyCodes.h" />
+    <ClInclude Include="DX11Framework.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="inputManager.h" />
+    <ClInclude Include="inputStructs.h" />
     <ClInclude Include="lightManager.h" />
+    <ClInclude Include="mainMenu.h" />
     <ClInclude Include="materialManager.h" />
     <ClInclude Include="maths.h" />
+    <ClInclude Include="menu.h" />
+    <ClInclude Include="menuElement.h" />
     <ClInclude Include="model.h" />
+    <ClInclude Include="object2D.h" />
     <ClInclude Include="objfilemodel.h" />
+    <ClInclude Include="optionsMenu.h" />
     <ClInclude Include="particleGenerator.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
@@ -143,7 +163,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="skybox.h" />
+    <ClInclude Include="sprite.h" />
+    <ClInclude Include="states.h" />
     <ClInclude Include="text2D.h" />
+    <ClInclude Include="text2D_OLD.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="textureManager.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="virtualKeyCodes.h" />

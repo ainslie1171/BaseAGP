@@ -7,6 +7,7 @@ Camera::Camera()
 	m_rotation = ZeroVector4;
 	m_speed = 2.0f;
 	m_rotatinSpeed = 180.0f;
+	m_lookAt = { 0.0f, 0.0f, 1.0f, 0.0f };
 }
 
 void Camera::RotateX(float degreesOfRotation)

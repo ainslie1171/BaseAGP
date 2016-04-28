@@ -1,7 +1,9 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include "input.h"
+
+
+#include "inputManager.h"
 #include <d3dx11.h>
 #include "text2D.h"
 #include "camera.h"
@@ -53,20 +55,20 @@ private:
 	materialManager* m_materialManager;
 	LightManager* m_lightManger;
 	Camera* m_camera;
-	Input* m_input;
+	InputManager* m_input;
 	SceneNode* m_rootNode;
 	SceneNode* m_player;
 	
 	void renderSkybox(const XMMATRIX& view, const XMMATRIX& projection);
 
 public:
-	Game(HINSTANCE hInstance);
+	Game(HINSTANCE hInstance, InputManager* input, ID3D11Device* device, ID3D11DeviceContext* context);
 	~Game();
 	HRESULT InitialiseWindow(WNDPROC WndProc, int nCmdShow);
 	HRESULT InitialiseD3D();
 	HRESULT InitialiseGraphics();
 
-	void setInput(Input* input);
+	void setInput(InputManager* input);
 	HWND getHWND() { return m_hWnd; };
 
 	void Render(float deltaTime);

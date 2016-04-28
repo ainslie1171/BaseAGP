@@ -22,8 +22,35 @@
     <Filter Include="Physics\Header Files">
       <UniqueIdentifier>{8137bae6-f88a-4971-a239-ec26640367fb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Physics\SourceFiles">
+    <Filter Include="2D">
+      <UniqueIdentifier>{5f084b2e-b716-4d4b-ab95-6c47bbd3753d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2D\Header Files">
+      <UniqueIdentifier>{ebb1f126-c864-4b59-8408-fd8e7c8a078d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2D\Source Files">
+      <UniqueIdentifier>{b5be1a26-5cd9-464e-b8e2-edc16b154520}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Menu">
+      <UniqueIdentifier>{822e3068-0ce0-4db6-8290-c570a3a88d9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Menu\Header Files">
+      <UniqueIdentifier>{1f4026fe-86e8-42ff-84a6-9af75049bf13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Menu\Source Files">
+      <UniqueIdentifier>{04a9b584-2594-4ce2-b805-8df0eba26b27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Physics\Source Files">
       <UniqueIdentifier>{37652ef9-a5aa-41fe-b5cc-27e4e4636356}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{31ff1965-b33d-4d05-931b-d2fc8a438278}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input\Header Files">
+      <UniqueIdentifier>{29571e7b-ee60-4ef9-b62f-8ee6d7ad609a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input\Source Files">
+      <UniqueIdentifier>{20d188d0-a0bf-4227-a224-fdd534f42b78}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -34,9 +61,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="input.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="text2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="lightManager.cpp">
@@ -73,10 +97,40 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="vector.cpp">
-      <Filter>Physics\SourceFiles</Filter>
+      <Filter>Physics\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="physics.cpp">
-      <Filter>Physics\SourceFiles</Filter>
+      <Filter>Physics\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX11Framework.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="object2D.cpp">
+      <Filter>2D\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sprite.cpp">
+      <Filter>2D\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="text2D_OLD.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="text2D.cpp">
+      <Filter>2D\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="menu.cpp">
+      <Filter>Menu\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="menuElement.cpp">
+      <Filter>Menu\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="inputManager.cpp">
+      <Filter>Input\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mainMenu.cpp">
+      <Filter>Menu\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="optionsMenu.cpp">
+      <Filter>Menu\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -109,9 +163,6 @@
     <ClInclude Include="input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="text2D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="constantBuffer0.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -122,9 +173,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="directInputKeyCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game.h">
@@ -156,6 +204,48 @@
     </ClInclude>
     <ClInclude Include="physics.h">
       <Filter>Physics\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX11Framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="object2D.h">
+      <Filter>2D\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sprite.h">
+      <Filter>2D\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="text2D_OLD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="text2D.h">
+      <Filter>2D\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="a_Template_h_file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu.h">
+      <Filter>Menu\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menuElement.h">
+      <Filter>Menu\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inputManager.h">
+      <Filter>Input\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inputStructs.h">
+      <Filter>Input\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="directInputKeyCodes.h">
+      <Filter>Input\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="states.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mainMenu.h">
+      <Filter>Menu\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="optionsMenu.h">
+      <Filter>Menu\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
