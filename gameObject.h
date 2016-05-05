@@ -102,6 +102,7 @@ public:
 	GameObject* getRoot(){ return m_rootGameObject; }
 	void Shot(void);
 	void setCanBeShot(bool b){ m_canBeShot = b; }
+	Vector3 getPosition(){ return m_Position; }
 };
 
 #endif//_GAMEOBJECT_H_

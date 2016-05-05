@@ -2,6 +2,7 @@
 #define _ENEMY_H_
 
 #include "player.h"
+#include "pickupManager.h"
 
 class Enemy:public Character
 {
@@ -10,14 +11,15 @@ protected:
 	Vector3 m_targetDirection;
 	Player* m_pPlayer;
 	float m_moveRange;
+	PickupManager* m_pPickupManager;
+
 	//Note this value should be squared
 	float m_attackRange;
 	void aquireNewTargetLocation(void);
-	virtual void Die(void) = 0;
+	virtual void Die(void);
 	virtual void Attack(void) = 0;
-	void virtual Hit() = 0;
 public:
-	Enemy(const GAMEOBJECT_DESC& desc, int maxHealth, Player* player);
+	Enemy(const GAMEOBJECT_DESC& desc, int maxHealth, Player* player, PickupManager* pickupManager);
 	~Enemy();
 	void virtual Update(void);
 	

@@ -73,6 +73,7 @@ Particle* ParticleManager::spawnParticleRef(Vector3 position, Vector3 velocity, 
 		p->life = life;
 		p->scale = scale;
 		p->parent = parent;
+		p->colour = { 0.0f, 0.0f, 0.0f };
 		p->dirty = false;
 		m_active.push_back(p);
 		m_free.pop_front();
@@ -113,7 +114,7 @@ void ParticleManager::Render(RENDER_DESC& desc)
 		ZeroMemory(&particle_cb_values, sizeof(PARTICLE_CONSTANT_BUFFER));
 		//add world view projection
 		particle_cb_values.WorldViewProjection = (world)*(*desc.view)*(*desc.projection);
-		particle_cb_values.colour = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+		particle_cb_values.colour = XMFLOAT4(p->colour.x, p->colour.y, p->colour.z, 1.0f);
 		//update 
 		m_pShaderManager->updateResources(&particle_cb_values, nullptr, 3);
 		UINT stride = sizeof(XMFLOAT3);

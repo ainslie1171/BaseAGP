@@ -3,12 +3,13 @@
 
 #include "enemy.h"
 
-class Turret : Enemy
+class Turret : public Enemy
 {
 private:
 	void Attack(void);
+
 public:
-	Turret(const GAMEOBJECT_DESC& desc, int maxHealth, Player* player);
+	Turret(const GAMEOBJECT_DESC& desc, int maxHealth, Player* player, PickupManager* pickupManager);
 	~Turret();
 	void Update(bool canAttack);
 };

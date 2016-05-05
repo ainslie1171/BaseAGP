@@ -1,8 +1,8 @@
 #include "flyingEnemy.h"
 #include "debugLine.h"
 
-FlyingEnemy::FlyingEnemy(const GAMEOBJECT_DESC& desc, int maxHealth, Player* player)
-	:Enemy(desc, maxHealth, player)
+FlyingEnemy::FlyingEnemy(const GAMEOBJECT_DESC& desc, int maxHealth, Player* player, PickupManager* pickupManager)
+	:Enemy(desc, maxHealth, player, pickupManager)
 {
 	while (!validateTargetLocation())
 	{
@@ -10,6 +10,38 @@ FlyingEnemy::FlyingEnemy(const GAMEOBJECT_DESC& desc, int maxHealth, Player* pla
 	}
 	m_Speed = 15.0f;
 	m_moveRange = 50.0f;
+	m_attackRange = 400.0f;
+	m_attackDelay = 1.0f;
+
+	//Turrets
+	//Left
+	GAMEOBJECT_DESC turretDesc = desc;
+	turretDesc.model = desc.modelManager->getModel(1);
+
+	Turret* t = new Turret(turretDesc, 30, player, pickupManager);
+	addChild(t);
+	t->setScale(0.1f);
+	t->setPosition({ -1.0, 0.0f, 0.7f });
+	m_leftTurrets.push_back(t);
+
+	t = new Turret(turretDesc, 30, player, pickupManager);
+	addChild(t);
+	t->setScale(0.1f);
+	t->setPosition({ -1.0, 0.0f, -0.7f });
+	m_leftTurrets.push_back(t);
+
+	//right
+	t = new Turret(turretDesc, 30, player, pickupManager);
+	addChild(t);
+	t->setScale(0.1f);
+	t->setPosition({ 1.0, 0.0f, 0.7f });
+	m_rightTurrets.push_back(t);
+
+	t = new Turret(turretDesc, 30, player, pickupManager);
+	addChild(t);
+	t->setScale(0.1f);
+	t->setPosition({ 1.0, 0.0f, -0.7f });
+	m_rightTurrets.push_back(t);
 }
 
 FlyingEnemy::~FlyingEnemy()
@@ -32,6 +64,80 @@ void FlyingEnemy::Update()
 		}
 	}
 	Move(m_targetDirection * m_Speed * m_deltaTime);
+
+	//turret cleanup
+	vector<Turret*>::iterator it = m_leftTurrets.begin();
+	while (it != m_leftTurrets.end())
+	{
+		if (!(*it))
+		{
+			it = m_leftTurrets.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+		if (m_leftTurrets.empty()) break;
+	}
+
+	it = m_rightTurrets.begin();
+	while (it != m_rightTurrets.end())
+	{
+		if (!(*it))
+		{
+			it = m_rightTurrets.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+		if (m_rightTurrets.empty()) break;
+	}
+
+	if (m_canAttack)
+	{
+		if (distanceBetweenVectorsSqr(m_Position, m_pPlayer->getTargetPosition()) < m_attackRange)
+		{
+			Attack();
+			if (!m_leftTurrets.empty())
+			{
+				for (Turret* t : m_leftTurrets)
+				{
+					t->Update(true);
+				}
+			}
+
+			if (!m_rightTurrets.empty())
+			{
+				for (Turret* t : m_rightTurrets)
+				{
+					t->Update(true);
+				}
+			}
+		}
+		else
+		{
+			for (Turret* t : m_leftTurrets)
+			{
+				t->Update(false);
+			}
+			for (Turret* t : m_rightTurrets)
+			{
+				t->Update(false);
+			}
+		}
+	}
+	else
+	{
+		for (Turret* t : m_leftTurrets)
+		{
+			t->Update(false);
+		}
+		for (Turret* t : m_rightTurrets)
+		{
+			t->Update(false);
+		}
+	}
 }
 
 void FlyingEnemy::setPosition(Vector3 position)
@@ -46,18 +152,11 @@ void FlyingEnemy::setPosition(Vector3 position)
 
 void FlyingEnemy::Attack(void)
 {
-	
+	m_attackTimer = 0.0f;
 }
 
-void FlyingEnemy::Die(void)
-{
 
-}
 
-void FlyingEnemy::Hit()
-{
-
-}
 
 bool FlyingEnemy::validateTargetLocation(void)
 {

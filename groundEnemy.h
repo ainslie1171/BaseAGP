@@ -7,10 +7,10 @@ class GroundEnemy : public Enemy
 {
 private:
 	void Attack(void);
-	void Die(void);
-	void virtual Hit();
+	void Die(void) override;
+
 public:
-	GroundEnemy(const GAMEOBJECT_DESC& desc, int maxHealth, Player* player);
+	GroundEnemy(const GAMEOBJECT_DESC& desc, int maxHealth, Player* player, PickupManager* pickupManager);
 	~GroundEnemy();
 	void virtual Update(void);
 	void virtual setPosition(Vector3 position);

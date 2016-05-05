@@ -21,6 +21,7 @@ struct Particle
 	float scale;
 	GameObject* parent;
 	bool dirty;
+	Vector3 colour;
 };
 
 struct PARTICLE_MANAGER_DESC

@@ -1,4 +1,5 @@
 #include "player.h"
+#include "pickup.h"
 
 Player::Player(GAMEOBJECT_DESC desc, int maxHealth)
 	:Character(desc, maxHealth)
@@ -13,7 +14,9 @@ Player::Player(GAMEOBJECT_DESC desc, int maxHealth)
 	m_minFlySpeed = 5.0f;
 	m_maxFlySpeed = 30.0f;
 	m_pController = new PlayerController(desc.inputManager, this);
-	m_attackDelay = 0.5f;
+	m_attackDelay = 0.2f;
+	m_ammo = 30;
+	m_maxAmmo = 100;
 }
 
 Player::~Player()
@@ -165,13 +168,38 @@ void Player::setSpeed(float speed)
 	m_pController->setSpeed(speed);
 }
 
-void Player::Hit()
+void Player::Hit(int damage)
 {
-	m_health -= 10;
+	m_health -= damage;
 	char outputString[50];
 	sprintf_s(outputString, "Health: %d/%d\n\n", m_health, m_maxHealth);
 	OutputDebugString(outputString);
 	if (m_health <= 0)
 		Die();
-	
+}
+
+void Player::collectPickup(int type, int amount)
+{
+	OutputDebugString("Pickup Collected");
+
+	switch (type)
+	{
+	case 0 :
+		if (m_health + amount < m_maxHealth)
+			m_health += amount;
+		break;
+	case 1:
+		if (m_ammo + amount < m_maxAmmo)
+			m_ammo += amount;
+		break;
+	}
+}
+
+bool Player::collidePickup(Pickup* p)
+{
+	float scaleOG = m_worldScale.x;
+	m_worldScale.x *= 6.0f;
+	bool result = checkCollisionRaySphere(p->getPosition(), (p->getPosition() + (p->getVelocity() * m_deltaTime)));
+	m_worldScale.x = scaleOG;
+	return result;
 }

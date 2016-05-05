@@ -201,6 +201,12 @@
     <ClCompile Include="debugLine.cpp">
       <Filter>DebugLine</Filter>
     </ClCompile>
+    <ClCompile Include="pickup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pickupManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="text2D_shaders.hlsl">
@@ -357,6 +363,12 @@
     </ClInclude>
     <ClInclude Include="debugLine.h">
       <Filter>DebugLine</Filter>
+    </ClInclude>
+    <ClInclude Include="pickup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pickupManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

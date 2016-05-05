@@ -11,15 +11,13 @@ private:
 	vector<Turret*> m_rightTurrets;
 
 	void Attack(void);
-	void Die(void);
-	void Hit();
+
 	bool validateTargetLocation(void);
 public:
-	FlyingEnemy(const GAMEOBJECT_DESC& desc, int maxHealth, Player* player);
+	FlyingEnemy(const GAMEOBJECT_DESC& desc, int maxHealth, Player* player, PickupManager* pickupManager);
 	~FlyingEnemy();
 	void virtual Update(void);
 	void virtual setPosition(Vector3 position);
-
 };
 
 #endif//_FLYINGENEMY_H_

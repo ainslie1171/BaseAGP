@@ -91,12 +91,14 @@ Game::Game(InputManager* input, ID3D11Device* device, ID3D11DeviceContext* conte
 	m_player = new Player(GameObjectDesc, 100);
 	m_player->setPosition({ 0.0f, 0.0f, -4.0f });
 
-	GroundEnemy* enemy = new GroundEnemy(GameObjectDesc, 100, m_player);
+	m_pickupManager = new PickupManager(m_pParticleManager, m_player);
+
+	GroundEnemy* enemy = new GroundEnemy(GameObjectDesc, 100, m_player, m_pickupManager);
 	enemy->setPosition({ 0.0f, -1.0f, 10.0f });
 
 
 	GameObjectDesc.model = m_pModelManager->getModel(2);
-	FlyingEnemy* fenemy = new FlyingEnemy(GameObjectDesc, 100, m_player);
+	FlyingEnemy* fenemy = new FlyingEnemy(GameObjectDesc, 100, m_player, m_pickupManager);
 	fenemy->setPosition({ 0.0f, 10.0f, 10.0f });
 
 
@@ -116,6 +118,8 @@ Game::Game(InputManager* input, ID3D11Device* device, ID3D11DeviceContext* conte
 	m_rootGameObject->addChild(m_player);
 	//gameObject->addChild(cubeObject);
 	
+	
+
 
 	//lights/manager
 
@@ -191,6 +195,7 @@ void Game::Update(float deltaTime)
 	m_rootGameObject->Update(deltaTime);
 	m_rootGameObject->cleanUp();
 	m_pParticleManager->Update(deltaTime);
+	m_pickupManager->Update(deltaTime);
 }
 
 void Game::Render(float deltaTime)

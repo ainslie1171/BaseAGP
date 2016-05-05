@@ -85,8 +85,16 @@ void PlayerController::Update(float deltaTime)
 
 	if (m_inputManager->IsKeyPressedOnce(DIK_TAB))
 	{
+		/*
 		char outputString[75];
 		sprintf_s(outputString, "Position: (%f,%f,%f)\n\n", m_position.x, m_position.y, m_position.z);
+		OutputDebugString(outputString);
+		*/
+
+		char outputString[50];
+		sprintf_s(outputString, "Health: %d/%d\n", m_player->getHealth(), m_player->getMaxHealth());
+		OutputDebugString(outputString);
+		sprintf_s(outputString, "Ammo: %d/%d\n\n", m_player->getAmmo(), m_player->getMaxAmmo());
 		OutputDebugString(outputString);
 	}
 }

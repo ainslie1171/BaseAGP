@@ -32,7 +32,7 @@ public:
 	void changeHealth();
 	int getHealth() { return m_health; }
 	void setAttackDelay(float attackDelay){ m_attackDelay = attackDelay; }
-	void virtual Hit() = 0;
+	virtual void Hit(int damage = 10);
 	void detachBullets();
 };
 

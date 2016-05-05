@@ -18,6 +18,7 @@
 #include "particleManager.h"
 #include "player.h"
 #include "debugLine.h"
+#include "pickupManager.h"
 
 //Enemies
 #include "groundEnemy.h"
@@ -55,6 +56,8 @@ private:
 	XMMATRIX m_identity;
 	ParticleManager* m_pParticleManager;
 	//ParticleGenerator* m_particleGenerator;
+
+	PickupManager* m_pickupManager;
 
 	float second;
 	int frameCount;

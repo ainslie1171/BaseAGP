@@ -116,6 +116,8 @@
     <ClCompile Include="physics.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="pickup.cpp" />
+    <ClCompile Include="pickupManager.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="playerController.cpp" />
     <ClCompile Include="SceneNode.cpp">
@@ -202,6 +204,8 @@
     <ClInclude Include="physics.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="pickup.h" />
+    <ClInclude Include="pickupManager.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="playerController.h" />
     <ClInclude Include="sceneNode.h">

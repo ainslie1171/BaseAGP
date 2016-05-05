@@ -37,6 +37,7 @@ struct Vector3
 	Vector3(const float rhs);
 	XMVECTOR getXMVector() const;
 	Vector3 normalise();
+	float length();
 };
 
 struct Vector4
@@ -65,6 +66,7 @@ struct Vector4
 	bool operator!=(const Vector4 &rhs);
 	XMVECTOR getXMVector() const;
 	XMFLOAT4 getXMFloat4() const;
+	float length();
 };
 
 static const Vector4 ZeroVector4 = { 0.0f, 0.0f, 0.0f, 0.0f };

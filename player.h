@@ -4,6 +4,7 @@
 #include "character.h"
 #include "playerController.h"
 #include "camera.h"
+class Pickup;
 //#include "physics.h"
 
 class Player : public Character
@@ -29,8 +30,14 @@ public:
 	Vector3 getTargetPosition() { return m_Position + m_eyePositionOffset; }
 	void virtual Attack();
 	void virtual Die();
-	void virtual Hit();
+	void Hit(int damage = 10) override;
+	void collectPickup(int type, int amount);
 
+	int getHealth(){ return m_health; }
+	int getMaxHealth(){ return m_maxHealth; }
+	int getAmmo(){ return m_ammo; }
+	int getMaxAmmo(){ return m_maxAmmo; }
+	bool collidePickup(Pickup* p);
 private:
 	PlayerController* m_pController;
 	Camera* m_pCamera;
@@ -40,6 +47,9 @@ private:
 	float m_flyingSpeed;
 	float m_minFlySpeed;
 	float m_maxFlySpeed;
+
+	int m_ammo;
+	int m_maxAmmo;
 
 	eMoveState m_moveState;
 };

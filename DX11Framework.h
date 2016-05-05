@@ -17,6 +17,10 @@
 //TODO Settings
 //DONE DeltaTime
 
+//TOTO DONT FORGET THIS ERROR
+//DXGI WARNING: IDXGISwapChain::Present: Fullscreen presentation inefficiencies incurred due to application not using IDXGISwapChain::ResizeBuffers appropriately, specifying a DXGI_MODE_DESC not available in IDXGIOutput::GetDisplayModeList, or not using DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH.DXGI_SWAP_CHAIN_DESC::BufferDesc = { 640, 480, { 60, 1 }, R8G8B8A8_UNORM, 0, 0 }; DXGI_SWAP_CHAIN_DESC::SampleDesc = { 1, 0 }; DXGI_SWAP_CHAIN_DESC::Flags = 0; [ MISCELLANEOUS WARNING #98: ]
+
+
 struct Timer
 {
 private:
