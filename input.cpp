@@ -80,7 +80,7 @@ void Input::ReadInputStates()
 			m_keyboardDevice->Acquire();
 		}
 	}
-
+	m_prevMouseState = m_mouseState;
 	hr = m_mouseDevice->GetDeviceState(sizeof(m_mouseState), (LPVOID)&m_mouseState);
 
 	if (FAILED(hr))
@@ -109,5 +109,19 @@ MouseData Input::getMouseData()
 	md.rightClick = (m_mouseState.rgbButtons[1] & 0x80)!=0;
 	md.centerClick = (m_mouseState.rgbButtons[2] & 0x80)!=0;
 	md.other = (m_mouseState.rgbButtons[3] & 0x80)!=0;
+	return md;
+}
+
+MouseData Input::getPrevMouseData()
+{
+	MouseData md;
+	md.x = m_prevMouseState.lX;
+	md.y = m_prevMouseState.lY;
+	md.scrollWheel = m_prevMouseState.lZ;
+
+	md.leftClick = (m_prevMouseState.rgbButtons[0] & 0x80) != 0;
+	md.rightClick = (m_prevMouseState.rgbButtons[1] & 0x80) != 0;
+	md.centerClick = (m_prevMouseState.rgbButtons[2] & 0x80) != 0;
+	md.other = (m_prevMouseState.rgbButtons[3] & 0x80) != 0;
 	return md;
 }

@@ -6,9 +6,10 @@ struct Particle;
 
 struct p_Particle
 {
-	Vector3 P;
-	Vector3 X;
-	float M;
+	Vector3 Position;
+	Vector3 Velocity;
+	float Mass;
+	float InvMass;
 	float scale;
 	float time;
 	Vector4 c;
@@ -19,7 +20,14 @@ struct p_Particle
 	void applyForce(const Vector3& A, float deltaTime);
 	void stepPosition(float dt);
 	bool simpleCollisionCheck(const p_Particle& p);
+	bool betterCollisionCheck(const p_Particle& p, float dt);
 	void collisionResponse(p_Particle& p);
+	void simpleCheckBoundries();
+	void betterCheckBoundries(float dt);
+	bool simpleBoundryCheck(const Vector3& b);
+	bool betterBoundryCheck(const Vector3& b, float dt);
+	void boundryCollisionResponse(const Vector3& b);
+	void altBoundryCollisionResponse(const Vector3& b);
 };
 
 void applyImpulse(p_Particle& p, const Vector3& J);

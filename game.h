@@ -3,16 +3,12 @@
 
 #include "input.h"
 #include <d3dx11.h>
-#include "text2D.h"
 #include "camera.h"
-#include "materialManager.h"
-#include "lightManager.h"
-#include "sceneNode.h"
+#include <vector>
 #include "maths.h"
-#include "skybox.h"
 #include "shaderManager.h"
-#include "textureManager.h"
 #include "particleGenerator.h"
+#include "plane.h"
 
 class Game
 {
@@ -30,34 +26,29 @@ private:
 	IDXGISwapChain*				m_pSwapChain = NULL;
 	ID3D11RenderTargetView*		m_pBackBufferRTView = NULL;
 	ID3D11DepthStencilView*		m_pZBuffer;
-	ID3D11DepthStencilState*	m_defaultDepthStencil;
-	ID3D11DepthStencilState*	m_skyboxDepthStencil;
-	ID3D11RasterizerState*		m_defaultRS;
-	ID3D11RasterizerState*		m_wireframeRS;
-	ID3D11RasterizerState*		m_skyboxRS;
-	Text2D*	m_2DText;
-	Model* cube;
-	Model* sphere;
-	Model* pointySphere;
-	Skybox* m_skybox;
-	XMMATRIX m_identity;
+
 	ParticleGenerator* m_particleGenerator;
+	p_Plane* m_pPlane;
+
+	struct wall
+	{
+		Vector3 p;
+		Vector3 r;
+	};
+
+	std::vector<wall> m_walls;
 
 	float second;
 	int frameCount;
-	bool wireframeMode;
+	float pCounter;
+
 
 	//InitialiseGraphics
 	ShaderManager* m_shaderManager;
-	TextureManager* m_textureManager;
-	materialManager* m_materialManager;
-	LightManager* m_lightManger;
+
 	Camera* m_camera;
 	Input* m_input;
-	SceneNode* m_rootNode;
-	SceneNode* m_player;
-	
-	void renderSkybox(const XMMATRIX& view, const XMMATRIX& projection);
+
 
 public:
 	Game(HINSTANCE hInstance);
@@ -69,7 +60,7 @@ public:
 	void setInput(Input* input);
 	HWND getHWND() { return m_hWnd; };
 
-	void Render(float deltaTime);
+	void Render(void);
 	void Update(float deltaTime);
 };
 

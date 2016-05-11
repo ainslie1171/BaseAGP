@@ -38,6 +38,7 @@ public:
 	void remove(Shader* shader);
 	void remove(unsigned int ID);
 	bool getShader(unsigned int ID, Shader* returnedShader);
+	Shader* getShader(unsigned int ID);
 };
 
 #endif

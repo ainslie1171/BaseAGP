@@ -1,29 +1,18 @@
 #include "game.h"
 
+
+
 Game::Game(HINSTANCE hInstance)
 {
 	m_hInst = hInstance;
-	strncpy_s(m_TutorialName, "SWD304 - Tutorial 15 Exercise 01\0", 100);
+	strncpy_s(m_TutorialName, "Project\0", 100);
+	pCounter = 0.0f;
 }
 
 Game::~Game()
 {
-	
-	if (m_2DText) { delete m_2DText; m_2DText = nullptr; }
-
-	if (pointySphere) { delete pointySphere; pointySphere = nullptr; }
-	if (sphere) { delete sphere; sphere = nullptr; }
-	if (cube) { delete cube; cube = nullptr; }
-	if (m_rootNode) { delete m_rootNode; m_rootNode = nullptr; }
-	if (m_skybox){ delete m_skybox; m_skybox = nullptr; }
-	if (m_materialManager){ delete m_materialManager; m_materialManager = nullptr; }
-	if (m_lightManger){ delete m_lightManger; m_lightManger = nullptr; }
 	if (m_shaderManager){ delete m_shaderManager; m_shaderManager = nullptr; }
-	if (m_textureManager){ delete m_textureManager; m_textureManager = nullptr; }
-
 	if (m_pZBuffer) m_pZBuffer->Release();//06-01b
-
-	if (m_wireframeRS) m_wireframeRS->Release();
 	if (m_pBackBufferRTView) m_pBackBufferRTView->Release();
 	if (m_pSwapChain) m_pSwapChain->Release();
 	if (m_pImmediateContext) m_pImmediateContext->Release();
@@ -180,179 +169,56 @@ HRESULT Game::InitialiseD3D()
 
 	m_pImmediateContext->RSSetViewports(1, &viewport);
 
-	m_2DText = new Text2D("assets/font1.bmp", m_pD3DDevice, m_pImmediateContext);
-
-	D3D11_RASTERIZER_DESC defaultDesc;
-	ZeroMemory(&defaultDesc, sizeof(defaultDesc));
-	defaultDesc.FillMode = D3D11_FILL_SOLID;
-	defaultDesc.CullMode = D3D11_CULL_BACK;
-	defaultDesc.DepthClipEnable = true;
-
-	hr = m_pD3DDevice->CreateRasterizerState(&defaultDesc, &m_defaultRS);
-
-	if (FAILED(hr)) return hr;
-
-	D3D11_RASTERIZER_DESC wireframeRSdesc;
-	ZeroMemory(&wireframeRSdesc, sizeof(wireframeRSdesc));
-	wireframeRSdesc.FillMode = D3D11_FILL_WIREFRAME;
-	wireframeRSdesc.CullMode = D3D11_CULL_NONE;
-	wireframeRSdesc.DepthClipEnable = true;
-
-	hr = m_pD3DDevice->CreateRasterizerState(&wireframeRSdesc, &m_wireframeRS);
-
-	if (FAILED(hr)) return hr;
-
-	D3D11_RASTERIZER_DESC skyboxRSdesc;
-	ZeroMemory(&skyboxRSdesc, sizeof(skyboxRSdesc));
-	skyboxRSdesc.FillMode = D3D11_FILL_SOLID;
-	skyboxRSdesc.CullMode = D3D11_CULL_FRONT;
-	skyboxRSdesc.DepthClipEnable = true;
-
-	hr = m_pD3DDevice->CreateRasterizerState(&skyboxRSdesc, &m_skyboxRS);
-
-	if (FAILED(hr)) return hr;
-
-	D3D11_DEPTH_STENCIL_DESC defaultDepthStencilDesc;
-	ZeroMemory(&defaultDepthStencilDesc, sizeof(defaultDepthStencilDesc));
-	defaultDepthStencilDesc.DepthEnable = true;
-	defaultDepthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	defaultDepthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-
-	hr = m_pD3DDevice->CreateDepthStencilState(&defaultDepthStencilDesc, &m_defaultDepthStencil);
-
-	if (FAILED(hr)) return hr;
-
-	D3D11_DEPTH_STENCIL_DESC skyboxDepthStencilDesc;
-	ZeroMemory(&skyboxDepthStencilDesc, sizeof(skyboxDepthStencilDesc));
-	skyboxDepthStencilDesc.DepthEnable = true;
-	skyboxDepthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	skyboxDepthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-
-	hr = m_pD3DDevice->CreateDepthStencilState(&skyboxDepthStencilDesc, &m_skyboxDepthStencil);
-
-	if (FAILED(hr)) return hr;
-
 	return S_OK;
 }
 
 HRESULT Game::InitialiseGraphics()
 {
-	//HRESULT hr = S_OK;
+	float offset = 0.3f;
 
-	//Shader* s = new Shader(m_pD3DDevice, "modelShader.hlsl");
-	//m_shaders.push_back(s);
+	m_pPlane = new p_Plane(m_pD3DDevice, m_pImmediateContext, { 0.0f, 0.0f, (5.0f + offset) }, ZeroVector3, 5.0f + offset);
 
-	m_textureManager = new TextureManager(m_pD3DDevice);
-	m_textureManager->add("assets/texture.bmp");
-	m_textureManager->add("assets/yellow.bmp");
-	//m_textureManager->add("assets.spherelight.png");
+	offset += 5.0f;
+
+	wall w;
+	//back
+	w.p = { 0.0f, 0.0f, offset};
+	w.r = ZeroVector3;
+	m_walls.push_back(w);
+	//front
+	w.p = { 0.0f, 0.0f, -offset};
+	w.r = {0.0f, 180.0f, 0.0f};
+	m_walls.push_back(w);
+	//left
+	w.p = { -offset, 0.0f, 0.0f };
+	w.r = { 0.0f, -90.0f, 0.0f };
+	m_walls.push_back(w);
+	//right
+	w.p = { offset, 0.0f, 0.0f };
+	w.r = { 0.0f, 90.0f, 0.0f };
+	m_walls.push_back(w);
+	//floor
+	w.p = { 0.0f, -offset, 0.0f };
+	w.r = {90.0f, 0.0f, 0.0f};
+	m_walls.push_back(w);
+
 
 	m_shaderManager = new ShaderManager(m_pD3DDevice);
-
-	m_shaderManager->add("modelShader.hlsl", 3);
-	m_shaderManager->add("testShader.hlsl", 3);
 	m_shaderManager->add("particleShader.hlsl", 1);
 
-	m_lightManger = new LightManager();
-
-	//Materials
-	m_materialManager = new materialManager();
-
-	SKYBOX_DESC sbDesc;
-	ZeroMemory(&sbDesc, sizeof(sbDesc));
-	sbDesc.device = m_pD3DDevice;
-	sbDesc.context = m_pImmediateContext;
-	sbDesc.textureFilepath = "assets/Texture2.dds";
-	m_skybox = new Skybox(sbDesc);
 
 	//particle generator
-	PARTICLE_GENERATOR_DESC pgDesc;
-	pgDesc.context = m_pImmediateContext;
-	pgDesc.device = m_pD3DDevice;
-	pgDesc.shaderManager = m_shaderManager;
-	pgDesc.targetShader = 3;
-	pgDesc.particleSpawnRate = 1.0f;
-	m_particleGenerator = new ParticleGenerator(pgDesc);
-
-	//objects
-	m_rootNode = new SceneNode();
-	
-	MODEL_DESC cubeDesc;
-	ZeroMemory(&cubeDesc, sizeof(cubeDesc));
-	cubeDesc.context = m_pImmediateContext;
-	cubeDesc.device = m_pD3DDevice;
-	cubeDesc.lightManager = m_lightManger;
-	cubeDesc.shaderManager = m_shaderManager;
-	cubeDesc.textureManager = m_textureManager;
-	cubeDesc.filePath = "assets/cube.obj";
-	cubeDesc.targetTexture = 1;
-	cubeDesc.targetShader = 2;
-	cubeDesc.material = m_materialManager->getMaterial(WhitePlastic);
-
-	cube = new Model(cubeDesc);
-	//cube->LoadObjModel("assets/cube.obj");
-	//cube->AddTexture("assets/yellow.bmp");
-	//cube->setMaterial(m_materialManager->getMaterial(WhitePlastic));
-	//cube->toggleUnlit(true);
-	//m_models.push_back(cube);
-
-	cubeDesc.filePath = "assets/Sphere.obj";
-	//cubeDesc.targetTexture = 2;
-	cubeDesc.material = m_materialManager->getMaterial(Gold);
-	sphere = new Model(cubeDesc);
-	//sphere->LoadObjModel("assets/Sphere.obj");
-	//sphere->AddTexture("assets/texture.bmp");
-	//sphere->setMaterial(m_materialManager->getMaterial(Gold));
-	sphere->toggleUnlit(true);
-	//m_models.push_back(sphere);
-	cubeDesc.targetTexture = 0;
-	cubeDesc.material = m_materialManager->getMaterial(WhitePlastic);
-	pointySphere = new Model(cubeDesc);
-	//pointySphere->LoadObjModel("assets/Sphere.obj");
-	//pointySphere->AddTexture("assets/texture.bmp");
-	//pointySphere->setMaterial(m_materialManager->getMaterial(test));
-	//pointySphere->setPosition({ 15.0f, 0.0f, 0.0f, 0.0f });
-	//pointySphere->setXPos(15.0f);
-	//pointySphere->toggleUnlit(true);
-	//m_models.push_back(pointySphere);
-	//2.93333411
-	//TODO work out where these are being deleted/make sure that they are
-	//SceneNode* cubeNode = new SceneNode(m_rootNode, cube);
-	//cubeNode->setPosition(XMVectorSet(-4.0f, 0.0f, 5.0f, 0.0f));
-	//cubeNode->setScale(XMVectorSet(0.5, 0.5, 0.5, 0.0));
-	//cubeNode->addBoundingSphereModel(sphere);
-	SceneNode* cubeNode2 = new SceneNode(m_rootNode, pointySphere);
-	cubeNode2->setScale(XMVectorSet(0.1f, 0.1f, 0.1f, 0.0));
-	cubeNode2->setPosition(XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f));
-	cubeNode2->addBoundingSphereModel(sphere);
-	//m_rootNode->addNode(cubeNode);
-	m_rootNode->addNode(cubeNode2);
-	m_player = cubeNode2;
-
-	//lights/manager
-	
-	
-	Light newLight;
-	ZeroMemory(&newLight, sizeof(newLight));
-	newLight.Direction = XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
-	newLight.Colour = XMVectorSet(1.0f, 1.0f, 1.0f, 0.0f);
-	newLight.type = DIRECTIONAL_LIGHT;
-
-	m_lightManger->addLight(newLight);
+	m_particleGenerator = new ParticleGenerator(m_pD3DDevice, m_pImmediateContext);
+	//m_particleGenerator->create();
 	
 	//camera
 	m_camera = &Camera::getInstance();
-	m_camera->setRootNode(m_rootNode);
-	m_camera->setPosition({ 0.0f, 0.0f, -5.0f, 0.0f });
+	m_camera->setPosition({ -12.0f, 5.0f, -12.0f, 0.0f });
+	m_camera->RotateX(45.0f *(XM_PI / 180.0f));
+	m_camera->RotateY(20.0f * (XM_PI / 180.0f));
 	
 	frameCount = 0;
 	second = 0.0f;
-
-	wireframeMode = false;
-
-	m_identity = XMMatrixIdentity();
-
-	//Shader s = m_shaderM
 
 	return S_OK;
 }
@@ -379,8 +245,8 @@ void Game::Update(float deltaTime)
 		DestroyWindow(m_hWnd);
 
 	//camera controller
-	m_camera->RotateX(m_input->getMouseData().x * m_camera->getRotationSpeed() * deltaTime);
-	m_camera->RotateY(m_input->getMouseData().y * m_camera->getRotationSpeed() * -deltaTime);
+	m_camera->RotateX(m_input->getMouseData().x * m_camera->getRotationSpeed() * deltaTime * XM_PI / 180.0f);
+		m_camera->RotateY(m_input->getMouseData().y * m_camera->getRotationSpeed() * deltaTime * XM_PI / 180.0f);
 	if (m_input->isKeyPressed(DIK_W))
 		m_camera->Forward(m_camera->getSpeed()*deltaTime);
 	if (m_input->isKeyPressed(DIK_S))
@@ -394,111 +260,59 @@ void Game::Update(float deltaTime)
 	if (m_input->isKeyPressed(DIK_E))
 		m_camera->Up(m_camera->getSpeed()*deltaTime);
 
-	float speed = 3.0f*deltaTime;
-	if (m_input->isKeyPressed(DIK_UP))
-		m_player->forward(speed);
-	else if (m_input->isKeyPressed(DIK_DOWN))
-		m_player->backward(speed);
-	if (m_input->isKeyPressed(DIK_LEFT))
-		m_player->left(speed);
-	else if (m_input->isKeyPressed(DIK_RIGHT))
-		m_player->right(speed);
 
-	if (m_input->isKeyPressed(DIK_INSERT))
+	if (m_input->getMouseData().leftClick && !m_input->getPrevMouseData().leftClick)
 	{
-		wireframeMode = !wireframeMode;
-		if (wireframeMode)
-		{
-			//for (Model* m : m_models)
-			//{
-			//	m->toggleUnlit(wireframeMode);
-			//	m->setMaterial(m_materialManager->getMaterial(RedPlastic));
-			//}
-			//sphere->setMaterial(m_materialManager->getMaterial(YellowPlastic));
-		}
-		else
-		{
-			//for (Model* m : m_models)
-			//{
-			//	m->toggleUnlit(wireframeMode);
-			//	m->setMaterial(m_materialManager->getMaterial(WhitePlastic));
-			//}
-		}
+		m_particleGenerator->spawnParticle();
+	}
+
+	pCounter += deltaTime;
+	if (pCounter >= 1.0f / 60.0f)
+	{
+		m_particleGenerator->update(pCounter);
+
+		pCounter = 0.0f;
 	}
 }
 
-void Game::Render(float deltaTime)
+void Game::Render(void)
 {
 	// Clear the back buffer - choose a colour you like
-	float rgba_clear_colour[4] = { 0.1f, 0.1f, 0.8f, 0.01f };
+	float rgba_clear_colour[4] = { 0.0f, 0.0f, 0.0f, 0.01f };
 	m_pImmediateContext->ClearRenderTargetView(m_pBackBufferRTView, rgba_clear_colour);
-
 	//Clear the Z buffer
 	m_pImmediateContext->ClearDepthStencilView(m_pZBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	m_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	XMMATRIX projection, view;
+	XMMATRIX world, projection, view;
+	world = XMMatrixIdentity();
 	projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.0f), 640.0f / 480.0f, 0.01f, 100.0f);
 	view = m_camera->getMatrixView();
 
-	//draw skybox
-	renderSkybox(view, projection);
-
-	//wireframe?
-	if (wireframeMode)
-	{
-		RENDER_DESC descWS;
-		ZeroMemory(&descWS, sizeof(descWS));
-		descWS.projection = &projection;
-		descWS.view = &view;
-		descWS.world = &m_identity;
-		descWS.targetShader = 0;
-		descWS.targetTexture = 0;
-		m_pImmediateContext->RSSetState(m_wireframeRS);
-		m_rootNode->drawBoundingSphere(descWS);
-	}
-	else
-	{
-		m_pImmediateContext->RSSetState(m_defaultRS);
-	}
-
-
-	RENDER_DESC desc;
+	RENDER_DESC2 desc;
 	ZeroMemory(&desc, sizeof(desc));
 	desc.projection = &projection;
 	desc.view = &view;
-	desc.world = &m_identity;
-	desc.targetShader = 0;
-	desc.targetTexture = 0;
-	desc.skyboxTexture = m_skybox->getTexture();
+	desc.world = &world;
+
 	XMVECTOR c = m_camera->getPosition().getXMVector();
 	desc.camera = &c;
-	desc.deltaTime = deltaTime;
-	XMVECTOR vv = m_camera->getVectorView();
-	desc.viewVector = &vv;
-	//render objects
-	//m_rootNode->draw(desc);
+	
+	m_pImmediateContext->VSSetShader(m_shaderManager->getShader(1)->VShader, 0, 0);
+	m_pImmediateContext->PSSetShader(m_shaderManager->getShader(1)->PShader, 0, 0);
+	m_pImmediateContext->IASetInputLayout(m_shaderManager->getShader(1)->InputLayout);
 
-	desc.world = &m_identity;
-	m_particleGenerator->draw(desc);
+	m_particleGenerator->drawP(desc);
+	
+
+	for (wall w : m_walls)
+	{
+		m_pPlane->setPos(w.p);
+		m_pPlane->setRot(w.r);
+		m_pPlane->draw((view * projection));
+	}
 
 	// Display what has just been rendered
 	m_pSwapChain->Present(0, 0);
-}
-
-void Game::renderSkybox(const XMMATRIX& view, const XMMATRIX& projection)
-{
-	XMMATRIX worldMatrix = XMMatrixIdentity();
-	worldMatrix *= XMMatrixScaling(3.0f, 3.0f, 3.0f);
-	Vector4 cp = m_camera->getPosition();
-	worldMatrix *= XMMatrixTranslation(cp.x, (cp.y + 2.9f), cp.z);
-
-	m_pImmediateContext->RSSetState(m_skyboxRS);
-	m_pImmediateContext->OMSetDepthStencilState(m_skyboxDepthStencil, 0);
-
-	m_skybox->Draw(worldMatrix, view, projection);
-
-	m_pImmediateContext->RSSetState(m_defaultRS);
-	m_pImmediateContext->OMSetDepthStencilState(m_defaultDepthStencil, 0);
 }

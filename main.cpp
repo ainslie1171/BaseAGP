@@ -84,7 +84,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// do something
 			input->ReadInputStates();
 			game->Update(DeltaTime.QuadPart/1000000.0f);
-			game->Render(DeltaTime.QuadPart / 1000000.0f);
+			game->Render();
 			UpdateDeltaTime();
 		}
 	}

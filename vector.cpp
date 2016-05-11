@@ -27,6 +27,15 @@ Vector3 Vector3::operator-(const Vector3 &rhs)
 	return result;
 }
 
+Vector3 Vector3::operator-()
+{
+	Vector3 result = *this;
+	result.x = -result.x;
+	result.y = -result.y;
+	result.z = -result.z;
+	return result;
+}
+
 Vector3 Vector3::operator-(const Vector3 &rhs) const
 {
 	Vector3 result = *this;
@@ -157,7 +166,7 @@ XMVECTOR Vector3::getXMVector() const
 
 Vector3 Vector3::normalise()
 {
-	return sqrtf(dot(*this, *this));
+	return (*this / sqrtf(dot(*this, *this)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

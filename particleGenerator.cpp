@@ -1,21 +1,18 @@
 #include "particleGenerator.h"
 
-ParticleGenerator::ParticleGenerator(const PARTICLE_GENERATOR_DESC& desc)
+
+ParticleGenerator::ParticleGenerator(ID3D11Device* device, ID3D11DeviceContext* context)
 {
-	m_pD3DDevice = desc.device;
-	m_pImmediateContext = desc.context;
-	m_pShaderManager = desc.shaderManager;
-	m_shaderID = desc.targetShader;
+	m_pD3DDevice = device;
+	m_pImmediateContext = context;
+
 	init();
 
-	for (UINT i = 0; i < 100; i++)
+	for (UINT i = 0; i < 1000; i++)
 	{
 		p_Particle* p = new p_Particle();
 		m_free.push_back(p);
 	}
-
-	m_particleSpawnRate = desc.particleSpawnRate;
-	m_untilParticle = desc.particleSpawnRate;
 }
 
 //13
@@ -85,120 +82,19 @@ HRESULT ParticleGenerator::init()
 	return S_OK;
 }
 
-void ParticleGenerator::draw(RENDER_DESC& desc)
-{
-	if (m_shaderID != desc.targetShader) updateShader(desc);
-	
-	
-	float deltaTime = desc.deltaTime;
-	m_untilParticle -= deltaTime;
 
 
-	if (m_untilParticle <= 0 && !m_free.empty())
-	{
-		p_Particle* p = m_free.front();
-		//set p values
-		//p->P = { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() };
-		p->P = { 0.0f, 0.0f, 0.0f };
-		p->X = { 0.0f, 0.0f, 0.0f };
-		p->scale = 0.3f;
-		p->M = 0.2f;
-		p->time = 0.0f;
-		p->checkColl = false;
-		p->c = Vector4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
-		//applyImpulse(*p, { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() });
-		m_active.push_back(p);
-		m_free.pop_front();
-		m_untilParticle = m_particleSpawnRate;
-	}
-
-	list<p_Particle*>::iterator it = m_active.begin();
-	list<list<p_Particle*>::iterator> dirty;
 
 
-	while (it != m_active.end())
-	{
-		p_Particle* p = (*it);
-		
-		
-
-		if (p->checkColl)
-		{
-			for (p_Particle* cp : m_active)
-			{
-				if (p != cp)
-				{
-					if (p->simpleCollisionCheck(*cp))
-						p->collisionResponse(*cp);
-				}
-			}
-		}
-		p->update(deltaTime);
-		drawOne(desc, *p);
 
 
-		if (p->X.y <= -4.0f)
-		{
-			p->P = (0.0f, 0.0f, 0.0f);
-			p->X.y = -4.0f;
-			/*
-			char outputString[50];
-			sprintf_s(outputString, "Life: %f\n\n", p->time);
-			OutputDebugString(outputString);
-			dirty.push_back(it);
-			*/
-		}
-
-		it++;
-	}
-
-
-	for (list<p_Particle*>::iterator dead : dirty)
-	{
-		m_free.push_back(*dead);
-		m_active.erase(dead);
-	}
-	
-	p_Particle Test;
-	Test.X = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	Test.scale = 0.1f;
-	Test.c = Vector4(1.0f, 1.0f, 0.0f, 1.0f);
-	drawOne(desc, Test);
-	
-	
-}
-
-void ParticleGenerator::move(p_Particle& particle, const Vector4& destination)
-{
-	particle.X = XMFLOAT3(destination.x, destination.y, destination.z);
-	if (simpleCollisionCheck(particle, destination))
-		particle.X = XMFLOAT3(-destination.x, -destination.y, -destination.z);
-}
-
-bool ParticleGenerator::simpleCollisionCheck(const p_Particle& particle, const Vector4& destination)
-{
-	for (p_Particle* p : m_active)
-	{
-		if (p != &particle)
-		{
-			float distanceSq = distanceBetweenVectorsSqr(destination, p->X);
-
-			float combRadiSq = pow((2 * p->scale), 2.0f);
-
-			if (distanceSq <= combRadiSq)
-				return true;
-		}
-	}
-	return false;
-}
-
-void ParticleGenerator::drawOne(RENDER_DESC& desc, const p_Particle& p)
+void ParticleGenerator::drawOne(RENDER_DESC2& desc, const p_Particle& p)
 {
 	XMMATRIX world = XMMatrixIdentity();
 	XMVECTOR d;
-	d.x = p.X.x - desc.camera->x;
-	d.y = p.X.y - desc.camera->y;
-	d.z = p.X.z - desc.camera->z;
+	d.x = p.Position.x - desc.camera->x;
+	d.y = p.Position.y - desc.camera->y;
+	d.z = p.Position.z - desc.camera->z;
 
 	float m_yAngle = atan2(d.x, d.z) + XM_PI;
 	float dyz = d.z / cos(m_yAngle);
@@ -207,7 +103,7 @@ void ParticleGenerator::drawOne(RENDER_DESC& desc, const p_Particle& p)
 	world = XMMatrixScaling(p.scale, p.scale, p.scale);
 	world *= XMMatrixRotationX(m_xAnlge);
 	world *= XMMatrixRotationY(m_yAngle);
-	world *= XMMatrixTranslation(p.X.x, p.X.y, p.X.z);
+	world *= XMMatrixTranslation(p.Position.x, p.Position.y, p.Position.z);
 	world *= (*desc.world);
 
 	//create constatnt buffer
@@ -227,21 +123,8 @@ void ParticleGenerator::drawOne(RENDER_DESC& desc, const p_Particle& p)
 	m_pImmediateContext->Draw(6, 0);
 }
 
-void ParticleGenerator::updateShader(RENDER_DESC& desc)
-{
-	Shader s;
-	if (!m_pShaderManager->getShader(m_shaderID, &s))
-	{
-		if (m_shaderID != 0) OutputDebugString("Failed to retrieve shader\n");
-	}
-	else
-	{
-		m_pImmediateContext->VSSetShader(s.VShader, 0, 0);
-		m_pImmediateContext->PSSetShader(s.PShader, 0, 0);
-		m_pImmediateContext->IASetInputLayout(s.InputLayout);
-	}
-	desc.targetShader = m_shaderID;
-}
+
+
 
 float ParticleGenerator::randomZeroToOne()
 {
@@ -253,4 +136,138 @@ float ParticleGenerator::randomNegOneToPosOne()
 {
 	float output = float(rand() % 201 - 100);
 	return output / 100.0f;
+}
+
+
+
+
+
+
+void ParticleGenerator::create()
+{
+	p_Particle* p = m_free.front();
+	p->Position = { 0.0f, 3.0f, 10.0f };
+	p->Velocity = { 0.5f, 0.0f, 0.0f };
+	p->scale = 0.1f;
+	p->Mass = 0.1f;
+	p->InvMass = 1 / p->Mass;
+	p->time = 0.0f;
+	p->checkColl = false;
+	p->c = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+	m_active.push_back(p);
+	m_free.pop_front();
+
+	p = m_free.front();
+	p->Position = { 3.0f, 3.0f, 10.0f };
+	p->Velocity = ZeroVector3;
+	p->scale = 0.1f;
+	p->Mass = 0.1f;
+	p->InvMass = 1 / p->Mass;
+	p->time = 0.0f;
+	p->checkColl = false;
+	p->c = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+	m_active.push_back(p);
+	m_free.pop_front();
+
+	p = m_free.front();
+	p->Position = { 1.5f, 0.0f, 10.0f };
+	p->Velocity = {0.0f, 1.0f, 0.0f};
+	p->scale = 0.1f;
+	p->Mass = 0.1f;
+	p->InvMass = 1 / p->Mass;
+	p->time = 0.0f;
+	p->checkColl = false;
+	p->c = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+	m_active.push_back(p);
+	m_free.pop_front();
+	
+
+}
+
+void ParticleGenerator::drawP(RENDER_DESC2& desc)
+{
+
+	p_Particle Test;
+	Test.Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	Test.scale = 0.1f;
+	Test.c = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+	drawOne(desc, Test);
+
+	//update(dt);
+	for (p_Particle* p : m_active)
+	{
+		drawOne(desc, *p);
+	}
+
+	
+}
+
+void ParticleGenerator::update(float dt)
+{
+	for (p_Particle* p : m_active)
+	{
+		p->applyForce(gravity, dt);
+	}
+
+	std::list<p_Particle*>::iterator j, i = m_active.begin();
+	p_Particle *p1, *p2;
+	while (i != m_active.end())
+	{
+		j = i;
+		j++;
+		p1 = (*i);
+		p1->betterCheckBoundries(dt);
+		while (j != m_active.end())
+		{
+			p2 = (*j);
+			//check collision
+			if (p1->betterCollisionCheck(*p2, dt))
+			{
+				//resolve collision
+				p1->collisionResponse(*p2);
+			}
+			j++;
+		}
+		
+		i++;
+	}
+
+	for (p_Particle* p : m_active)
+	{
+		p->stepPosition(dt);
+	}
+}
+
+void ParticleGenerator::spawnParticle()
+{
+	if (!m_free.empty())
+	{
+		p_Particle* p = m_free.front();
+		//set p values
+		p->Velocity = { randomNegOneToPosOne(), randomZeroToOne(), randomNegOneToPosOne() };
+		p->Position = { randomNegOneToPosOne() * 3.0f, randomZeroToOne() * 3.0f, randomNegOneToPosOne() * 3.0f };
+		p->scale = 0.3f;
+		p->Mass = 1.0f;
+		p->InvMass = 1 / p->Mass;
+		p->time = 0.0f;
+		p->checkColl = false;
+		p->c = Vector4(randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), 1.0f);
+		bool result = false;
+		for(p_Particle* Pi : m_active)
+		{
+			if (p->betterCollisionCheck(*Pi, 1.0f / 60.0f)) result = true;
+		}
+		while (result)
+		{
+			result = false;
+			p->Position = { randomNegOneToPosOne() * 3.0f, randomZeroToOne() * 3.0f, randomNegOneToPosOne() * 3.0f };
+			for (p_Particle* Pi : m_active)
+			{
+				if (p->betterCollisionCheck(*Pi, 1.0f / 60.0f)) result = true;
+			}
+		} 
+
+		m_active.push_back(p);
+		m_free.pop_front();
+	}
 }
