@@ -1,33 +1,6 @@
 #include "physics.h"
 #include "particleGenerator.h"
 
-Vector3 ApplyForce(const Particle& p, const Vector3& f)
-{
-	return Vector3(p.mass) * f;
-}
-
-Vector3 CalcAcceleration(const Particle& p, const Vector3& f)
-{
-	return f / Vector3(p.mass);
-}
-
-/*
-void applyImpulse(p_Particle& p, const Vector3& J)
-{
-	p.Momentum += J;
-}
-
-void stepPosition(p_Particle& p, float deltaTime)
-{
-	p.Position += p.Momentum * deltaTime / p.Mass;
-}
-
-void applyForce(p_Particle& p, const Vector3& A, float deltaTime)
-{
-	p.Momentum += A * p.Mass * deltaTime;
-}
-*/
-
 
 void p_Particle::update(float dt)
 {
@@ -88,7 +61,7 @@ bool p_Particle::betterCollisionCheck(const p_Particle& p, float dt)
 	}
 }
 
-void p_Particle::checkBoundries()
+void p_Particle::simpleCheckBoundries()
 {
 	Vector3 bot, left, right, front, back;
 	bot = { 0.0f, -5.0f, 0.0f };
@@ -147,6 +120,66 @@ bool p_Particle::simpleBoundryCheck(const Vector3& b)
 	return false;
 }
 
+void p_Particle::betterCheckBoundries(float dt)
+{
+	Vector3 bot, left, right, front, back;
+	bot = { 0.0f, -5.0f, 0.0f };
+	left = { -5.0f, 0.0f, 0.0f };
+	right = { 5.0f, 0.0f, 0.0f };
+	front = { 0.0f, 0.0f, -5.0f };
+	back = { 0.0f, 0.0f, 5.0f };
+
+
+
+	if (betterBoundryCheck(bot, dt))
+		boundryCollisionResponse(bot);
+
+	if (betterBoundryCheck(left, dt))
+		boundryCollisionResponse(left);
+
+	if (betterBoundryCheck(right, dt))
+		boundryCollisionResponse(right);
+
+	if (betterBoundryCheck(front, dt))
+		boundryCollisionResponse(front);
+
+	if (betterBoundryCheck(back, dt))
+		boundryCollisionResponse(back);
+}
+
+bool p_Particle::betterBoundryCheck(const Vector3& b, float dt)
+{
+	Vector3 Pos = Position + (Velocity*dt);
+
+	if (b.x < 0)
+	{
+		return (Pos.x < b.x);
+	}
+	else if (b.x > 0)
+	{
+		return (Pos.x > b.x);
+	}
+
+	if (b.y < 0)
+	{
+		return (Pos.y < b.y);
+	}
+	else if (b.y > 0)
+	{
+		return (Pos.y > b.y);
+	}
+
+	if (b.z < 0)
+	{
+		return (Pos.z < b.z);
+	}
+	else if (b.z > 0)
+	{
+		return (Pos.z > b.z);
+	}
+
+	return false;
+}
 
 void p_Particle::boundryCollisionResponse(const Vector3& b)
 {
@@ -158,6 +191,18 @@ void p_Particle::boundryCollisionResponse(const Vector3& b)
 	if (b.z != 0)
 		Velocity.z = dif.z;
 }
+
+void p_Particle::altBoundryCollisionResponse(const Vector3& b)
+{
+	if (b.x != 0)
+		Velocity.x = 0.0f;
+	if (b.y != 0)
+		Velocity.y = 0.0f;
+	if (b.z != 0)
+		Velocity.z = 0.0f;
+}
+
+
 
 
 void p_Particle::collisionResponse(p_Particle& p)

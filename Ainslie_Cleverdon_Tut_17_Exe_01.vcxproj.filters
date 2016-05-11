@@ -36,37 +36,13 @@
     <ClCompile Include="input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="text2D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lightManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="objfilemodel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="materialManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="maths.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="shaderManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="skybox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="textureManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="particleGenerator.cpp">
@@ -78,24 +54,15 @@
     <ClCompile Include="physics.cpp">
       <Filter>Physics\SourceFiles</Filter>
     </ClCompile>
+    <ClCompile Include="plane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="text2D_shaders.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
-    <FxCompile Include="skyboxShader.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
-    <FxCompile Include="modelShader.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
-    <FxCompile Include="reflectShader.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
-    <FxCompile Include="testShader.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
     <FxCompile Include="particleShader.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
@@ -109,43 +76,16 @@
     <ClInclude Include="input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="text2D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="constantBuffer0.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lightManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="objfilemodel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="directInputKeyCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="materialManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sceneNode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="maths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="skybox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="shaderManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textureManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="particleGenerator.h">
@@ -156,6 +96,9 @@
     </ClInclude>
     <ClInclude Include="physics.h">
       <Filter>Physics\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="plane.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

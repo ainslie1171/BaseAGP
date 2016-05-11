@@ -15,13 +15,11 @@ private:
 
 	float	m_speed;
 	float 	m_rotatinSpeed;
+	float m_yaw;
+	float m_pitch;
+	XMMATRIX m_transform;
+	Vector3 m_position;
 
-	Vector4 m_position;
-	Vector4	m_rotation;
-	Vector4	m_lookAt;
-
-	SceneNode* m_rootNode;
-	void move(const Vector4& destination);
 
 public:
 
@@ -45,12 +43,11 @@ public:
 	void Strafe(float distance);
 
 	XMMATRIX getMatrixView();
-	XMVECTOR getVectorView();
+
 
 	float getSpeed(){ return m_speed; }
 	float getRotationSpeed(){ return m_rotatinSpeed; }
 
-	void setRootNode(SceneNode* node){ m_rootNode = node; }
 };
 
 #endif

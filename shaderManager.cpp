@@ -142,3 +142,15 @@ bool ShaderManager::getShader(unsigned int ID, Shader* returnedShader)
 	}
 	return false;
 }
+
+Shader* ShaderManager::getShader(unsigned int ID)
+{
+	for (unsigned int i = 0; i < m_shaders.size(); i++)
+	{
+		if (m_shaders[i]->ID == ID)
+		{
+			return m_shaders[i];
+		}
+	}
+	return nullptr;
+}

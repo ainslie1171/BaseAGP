@@ -1,34 +1,31 @@
 #ifndef _PARTICLE_GENERATOR_H_
 #define _PARTICLE_GENERATOR_H_
 
-#include "model.h"
 #include <list>
 #include <map>
 #include "physics.h"
 #include "AltVector.h"
+#include "shaderManager.h"
 
-struct Particle
+struct RENDER_DESC2
 {
-	Vector3 position;
-	Vector3 linVelocity;
-	Vector4 colour;
-	float mass;
-	float radius;
-	float angle;
-	float angVelocity;
-
+	XMVECTOR* camera;
+	XMMATRIX* world;
+	XMMATRIX* view;
+	XMMATRIX* projection;
 };
 
-struct PARTICLE_GENERATOR_DESC
+struct PARTICLE_CONSTANT_BUFFER
 {
-	ID3D11Device* device;
-	ID3D11DeviceContext* context;
-	ShaderManager* shaderManager;
-	UINT targetShader;
-	float particleSpawnRate;
+	/////////////////////////////////////////////////
+	XMMATRIX WorldViewProjection;	//   64 bytes  //
+	//////////////////4 x 16 bytes///////////////////
+
+	/////////////////////////////////////////////////
+	XMFLOAT4 colour;				//   16 bytes  //
+	////////////////////16 bytes/////////////////////
 };
 
-class Sphere;
 
 class ParticleGenerator
 {
@@ -37,31 +34,26 @@ private:
 	ID3D11DeviceContext* m_pImmediateContext;
 	ID3D11Buffer* m_pVertexBuffer;
 	ID3D11Buffer* m_pConstantBuffer;
-	ShaderManager* m_pShaderManager;
-	UINT m_shaderID;
-	float m_untilParticle;
-	float m_particleSpawnRate;
+
 	std::list<p_Particle*> m_free;
 	std::list<p_Particle*> m_active;
 	std::map<p_Particle*, p_Particle*> m_collisions;
 
 	HRESULT init();
-	void updateShader(RENDER_DESC& desc);
-	void drawOne(RENDER_DESC& desc, const p_Particle& p);
-	void drawOne(RENDER_DESC& desc, const Sphere& s);
+
+	void drawOne(RENDER_DESC2& desc, const p_Particle& p);
+
 	float randomZeroToOne();
 	float randomNegOneToPosOne();
-	void move(p_Particle& particle, const Vector4& destination);
-	bool simpleCollisionCheck(const p_Particle& particle, const Vector4& destination);
+
 public:
-	ParticleGenerator(const PARTICLE_GENERATOR_DESC& desc);
+	ParticleGenerator(ID3D11Device* device, ID3D11DeviceContext* context);
 	~ParticleGenerator();
-	void draw(RENDER_DESC& desc);
+
 	void create();
-	void drawS(RENDER_DESC& desc);
-	void drawP(RENDER_DESC& desc);
+	void drawS(RENDER_DESC2& desc);
+	void drawP(RENDER_DESC2& desc);
 	void update(float dt);
-	void doGravityP(float dt);
 	void spawnParticle();
 };
 

@@ -81,70 +81,42 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="input.cpp" />
-    <ClCompile Include="lightManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="materialManager.cpp" />
     <ClCompile Include="maths.cpp" />
-    <ClCompile Include="model.cpp" />
-    <ClCompile Include="objfilemodel.cpp" />
     <ClCompile Include="particleGenerator.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="physics.cpp" />
-    <ClCompile Include="SceneNode.cpp" />
+    <ClCompile Include="plane.cpp" />
     <ClCompile Include="shaderManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="skybox.cpp" />
-    <ClCompile Include="text2D.cpp" />
-    <ClCompile Include="textureManager.cpp" />
     <ClCompile Include="vector.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="modelShader.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </FxCompile>
     <FxCompile Include="particleShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="reflectShader.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="skyboxShader.hlsl">
+    <FxCompile Include="shaders.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="testShader.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="text2D_shaders.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
-    <ClInclude Include="constantBuffer0.h" />
     <ClInclude Include="directInputKeyCodes.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="input.h" />
-    <ClInclude Include="lightManager.h" />
-    <ClInclude Include="materialManager.h" />
     <ClInclude Include="maths.h" />
-    <ClInclude Include="model.h" />
-    <ClInclude Include="objfilemodel.h" />
     <ClInclude Include="particleGenerator.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="physics.h" />
-    <ClInclude Include="sceneNode.h" />
+    <ClInclude Include="plane.h" />
     <ClInclude Include="shaderManager.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="skybox.h" />
-    <ClInclude Include="text2D.h" />
-    <ClInclude Include="textureManager.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="virtualKeyCodes.h" />
   </ItemGroup>

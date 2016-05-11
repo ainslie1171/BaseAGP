@@ -131,7 +131,7 @@ struct SKYBOX_CONSTANT_BUFFER
 	//////////////////4 x 16 bytes///////////////////
 };
 
-struct PARTICLE_CONSTANT_BUFFER
+struct PARTICLE_CONSTANT_BUFFER2
 {
 	/////////////////////////////////////////////////
 	XMMATRIX WorldViewProjection;	//   64 bytes  //

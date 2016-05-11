@@ -22,9 +22,12 @@ struct p_Particle
 	bool simpleCollisionCheck(const p_Particle& p);
 	bool betterCollisionCheck(const p_Particle& p, float dt);
 	void collisionResponse(p_Particle& p);
-	void checkBoundries();
+	void simpleCheckBoundries();
+	void betterCheckBoundries(float dt);
 	bool simpleBoundryCheck(const Vector3& b);
+	bool betterBoundryCheck(const Vector3& b, float dt);
 	void boundryCollisionResponse(const Vector3& b);
+	void altBoundryCollisionResponse(const Vector3& b);
 };
 
 void applyImpulse(p_Particle& p, const Vector3& J);
